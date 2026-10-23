@@ -1,6 +1,8 @@
 package mundo;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 
 public class Hotel {
 
@@ -113,5 +115,87 @@ public class Hotel {
             return 1;
         }
         return (int) n;
+    }
+
+    public static BigDecimal[] totalesVenta(LinkedList<ProductoVendido> items) {
+        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal iva5 = BigDecimal.ZERO;
+        BigDecimal iva19 = BigDecimal.ZERO;
+        BigDecimal exento = BigDecimal.ZERO;
+        for (int i = 0; i < items.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) items.get(i);
+            Producto p = OperacionesProducto.buscar(pv.getIdProducto());
+            String iva = "Exento";
+            if (p.getIva() == 5) {
+                iva = "5%";
+            }
+            if (p.getIva() == 19) {
+                iva = "19%";
+            }
+            BigDecimal base = pv.getPrecioUnitario().multiply(new BigDecimal(pv.getCantidad()));
+            BigDecimal[] r = OperacionesVenta.calcular(base, iva);
+            total = total.add(r[0]);
+            iva5 = iva5.add(r[1]);
+            iva19 = iva19.add(r[2]);
+            exento = exento.add(r[3]);
+        }
+        return new BigDecimal[]{total, iva5, iva19, exento};
+    }
+
+    public static String sinExistencia(LinkedList<ProductoVendido> items) {
+        for (int i = 0; i < items.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) items.get(i);
+            Producto p = OperacionesProducto.buscar(pv.getIdProducto());
+            if (p == null) {
+                return "(producto eliminado)";
+            }
+            if (p.getExistencia() < pv.getCantidad()) {
+                return p.getDescripcion();
+            }
+        }
+        return null;
+    }
+
+    public static void guardarProductos(long idVenta, LinkedList<ProductoVendido> items) {
+        for (int i = 0; i < items.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) items.get(i);
+            OperacionesProductoVendido.Guardar(new ProductoVendido(OperacionesProductoVendido.nuevoId(), pv.getIdProducto(), idVenta, pv.getCantidad(), pv.getPrecioUnitario()));
+            Producto p = OperacionesProducto.buscar(pv.getIdProducto());
+            p.setExistencia(p.getExistencia() - (int) pv.getCantidad());
+        }
+    }
+
+    public static LinkedList<ProductoVendido> productosDeVenta(long idVenta) {
+        LinkedList<ProductoVendido> items = new LinkedList();
+        for (int i = 0; i < OperacionesProductoVendido.lpv.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) OperacionesProductoVendido.lpv.get(i);
+            if (pv.getIdVenta() == idVenta) {
+                items.add(new ProductoVendido(pv.getIdProductoV(), pv.getIdProducto(), pv.getIdVenta(), pv.getCantidad(), pv.getPrecioUnitario()));
+            }
+        }
+        return items;
+    }
+
+    public static void devolverProductos(long idVenta) {
+        for (int i = 0; i < OperacionesProductoVendido.lpv.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) OperacionesProductoVendido.lpv.get(i);
+            if (pv.getIdVenta() == idVenta) {
+                Producto p = OperacionesProducto.buscar(pv.getIdProducto());
+                if (p != null) {
+                    p.setExistencia(p.getExistencia() + (int) pv.getCantidad());
+                }
+            }
+        }
+        OperacionesProductoVendido.eliminarDeVenta(idVenta);
+    }
+
+    public static boolean productoTieneVentas(long idProducto) {
+        for (int i = 0; i < OperacionesProductoVendido.lpv.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) OperacionesProductoVendido.lpv.get(i);
+            if (pv.getIdProducto() == idProducto) {
+                return true;
+            }
+        }
+        return false;
     }
 }

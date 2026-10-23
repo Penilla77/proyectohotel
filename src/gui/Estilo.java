@@ -53,6 +53,7 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicMenuBarUI;
 import javax.swing.plaf.basic.BasicMenuItemUI;
 import javax.swing.plaf.basic.BasicMenuUI;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 import mundo.Habitacion;
 import mundo.OperacionesCliente;
@@ -393,6 +394,15 @@ public final class Estilo {
             } else if (k instanceof JLabel l) {
                 l.setFont(fuente(Font.PLAIN, 13));
                 l.setForeground(TEXTO);
+            } else if (k instanceof JScrollPane sp) {
+                sp.getVerticalScrollBar().setUI(new BarraUI());
+                sp.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
+                sp.getHorizontalScrollBar().setUI(new BarraUI());
+                sp.getHorizontalScrollBar().setPreferredSize(new Dimension(10, 10));
+                sp.setCorner(JScrollPane.LOWER_RIGHT_CORNER, null);
+                JPanel esquina = new JPanel();
+                esquina.setBackground(ENCAB);
+                sp.setCorner(JScrollPane.UPPER_RIGHT_CORNER, esquina);
             } else if (k instanceof SelectorFecha) {
                 continue;
             } else if (k instanceof Container cc) {
@@ -479,7 +489,7 @@ public final class Estilo {
             total += ancho[c];
         }
         double factor = total < 900 ? 900.0 / total : 1.0;
-        t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        t.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         for (int c = 0; c < ancho.length; c++) {
             t.getColumnModel().getColumn(c).setPreferredWidth((int) (ancho[c] * factor));
         }
@@ -602,6 +612,49 @@ public final class Estilo {
             }
             g2.dispose();
             super.paint(g, c);
+        }
+    }
+
+    private static final class BarraUI extends BasicScrollBarUI {
+
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return botonVacio();
+        }
+
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return botonVacio();
+        }
+
+        private JButton botonVacio() {
+            JButton b = new JButton();
+            b.setPreferredSize(new Dimension(0, 0));
+            b.setMinimumSize(new Dimension(0, 0));
+            b.setMaximumSize(new Dimension(0, 0));
+            return b;
+        }
+
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, java.awt.Rectangle r) {
+            g.setColor(FONDO);
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+
+        @Override
+        protected void paintThumb(Graphics g, JComponent c, java.awt.Rectangle r) {
+            if (r.isEmpty()) {
+                return;
+            }
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (isThumbRollover() || isDragging) {
+                g2.setColor(ACENTO);
+            } else {
+                g2.setColor(mezclar(BORDE, Color.BLACK, 0.12));
+            }
+            g2.fillRoundRect(r.x + 2, r.y + 2, r.width - 4, r.height - 4, 6, 6);
+            g2.dispose();
         }
     }
 }

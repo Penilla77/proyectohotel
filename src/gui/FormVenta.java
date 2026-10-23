@@ -1,17 +1,25 @@
 package gui;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import javax.swing.JOptionPane;
 import mundo.Cliente;
+import mundo.Hotel;
 import mundo.OperacionesCliente;
+import mundo.OperacionesProducto;
+import mundo.OperacionesProductoVendido;
 import mundo.OperacionesVenta;
+import mundo.Producto;
+import mundo.ProductoVendido;
 import mundo.Tablas;
 import mundo.Venta;
 
 public class FormVenta extends javax.swing.JFrame {
 
     private long idSel = 0;
+    private LinkedList<ProductoVendido> carrito = new LinkedList();
 
     public FormVenta() {
         Estilo.instalar();
@@ -26,9 +34,20 @@ public class FormVenta extends javax.swing.JFrame {
         jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
         textTotal.setBackground(new java.awt.Color(0xEFEFEA));
+        Estilo.boton(btnAgregar, Estilo.ACENTO);
+        Estilo.boton(btnQuitar, Estilo.GRIS);
+        jScrollPane2.getViewport().setBackground(java.awt.Color.WHITE);
+        jScrollPane2.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+        tablaProductos.setDefaultEditor(Object.class, null);
+        tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(carrito));
+        Estilo.tabla(tablaProductos);
         this.comboCliente.removeAllItems();
         for (Cliente x : OperacionesCliente.lc) {
             this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
+        }
+        this.comboProducto.removeAllItems();
+        for (Producto x : OperacionesProducto.lp) {
+            this.comboProducto.addItem(x.getIdProducto() + " - " + x.getDescripcion() + " - " + Tablas.dinero(x.getPrecioVenta()));
         }
 
         tabla.setDefaultEditor(Object.class, null);
@@ -55,11 +74,15 @@ public class FormVenta extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         fechaVenta = new gui.SelectorFecha();
         jLabel5 = new javax.swing.JLabel();
-        textValor = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        comboIva = new javax.swing.JComboBox<>();
-        jLabel7 = new javax.swing.JLabel();
         textTotal = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        comboProducto = new javax.swing.JComboBox<>();
+        jLabel7 = new javax.swing.JLabel();
+        textCantidad = new javax.swing.JTextField();
+        btnAgregar = new javax.swing.JButton();
+        btnQuitar = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tablaProductos = new javax.swing.JTable();
         btnGuardar = new javax.swing.JButton();
         btnBuscar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
@@ -80,26 +103,30 @@ public class FormVenta extends javax.swing.JFrame {
 
         jLabel4.setText("Fecha");
 
-        jLabel5.setText("Valor sin IVA");
-
-        textValor.addCaretListener(new javax.swing.event.CaretListener() {
-            public void caretUpdate(javax.swing.event.CaretEvent evt) {
-                textValorCaretUpdate(evt);
-            }
-        });
-
-        jLabel6.setText("IVA");
-
-        comboIva.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Exento", "5%", "19%" }));
-        comboIva.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                comboIvaActionPerformed(evt);
-            }
-        });
-
-        jLabel7.setText("Total (automático)");
+        jLabel5.setText("Total (automático)");
 
         textTotal.setEditable(false);
+
+        jLabel6.setText("Producto");
+
+        jLabel7.setText("Cantidad");
+
+        btnAgregar.setText("Agregar producto");
+        btnAgregar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAgregarActionPerformed(evt);
+            }
+        });
+
+        btnQuitar.setText("Quitar producto");
+        btnQuitar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnQuitarActionPerformed(evt);
+            }
+        });
+
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(900, 110));
+        jScrollPane2.setViewportView(tablaProductos);
 
         btnGuardar.setText("Guardar");
         btnGuardar.addActionListener(new java.awt.event.ActionListener() {
@@ -139,7 +166,7 @@ public class FormVenta extends javax.swing.JFrame {
                 tablaKeyReleased(evt);
             }
         });
-        jScrollPane1.setPreferredSize(new java.awt.Dimension(900, 230));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(900, 170));
         jScrollPane1.setViewportView(tabla);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -159,7 +186,7 @@ public class FormVenta extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(comboCliente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(fechaVenta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(comboIva, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(comboProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(28, 28, 28)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
@@ -168,8 +195,14 @@ public class FormVenta extends javax.swing.JFrame {
                         .addGap(10, 10, 10)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(comboPago, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(textValor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(textTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(textTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(textCantidad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnAgregar)
+                        .addGap(8, 8, 8)
+                        .addComponent(btnQuitar))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnGuardar)
@@ -198,13 +231,19 @@ public class FormVenta extends javax.swing.JFrame {
                     .addComponent(jLabel4)
                     .addComponent(fechaVenta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
-                    .addComponent(textValor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(comboIva, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(comboProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7)
-                    .addComponent(textTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnAgregar)
+                    .addComponent(btnQuitar))
+                .addGap(10, 10, 10)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                 .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnGuardar)
@@ -212,44 +251,92 @@ public class FormVenta extends javax.swing.JFrame {
                     .addComponent(btnModificar)
                     .addComponent(btnEliminar))
                 .addGap(14, 14, 14)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
                 .addGap(18, 18, 18))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void textValorCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_textValorCaretUpdate
-        String v = this.textValor.getText().trim();
-        boolean esNumero = !v.isEmpty() && v.length() <= 10;
-        for (int i = 0; i < v.length(); i++) {
-            if (!Character.isDigit(v.charAt(i))) {
-                esNumero = false;
-            }
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
+        int idProd = -1;
+        if (this.comboProducto.getItemCount() > 0) {
+            idProd = Integer.parseInt(this.comboProducto.getSelectedItem().toString().split(" - ")[0]);
         }
-        if (esNumero) {
-            BigDecimal[] r = OperacionesVenta.calcular(new BigDecimal(v), (String) this.comboIva.getSelectedItem());
-            this.textTotal.setText(Tablas.dinero(r[0]));
-        } else {
-            this.textTotal.setText("");
-        }
-    }//GEN-LAST:event_textValorCaretUpdate
+        String cantTxt = this.textCantidad.getText().trim();
 
-    private void comboIvaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboIvaActionPerformed
-        String v = this.textValor.getText().trim();
-        boolean esNumero = !v.isEmpty() && v.length() <= 10;
-        for (int i = 0; i < v.length(); i++) {
-            if (!Character.isDigit(v.charAt(i))) {
-                esNumero = false;
+        if (idProd == -1) {
+            JOptionPane.showMessageDialog(this, "Debe haber al menos un producto registrado", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (cantTxt.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe ingresar la cantidad", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (cantTxt.length() > 4) {
+            JOptionPane.showMessageDialog(this, "La cantidad puede tener máximo 4 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        for (int i = 0; i < cantTxt.length(); i++) {
+            if (!Character.isDigit(cantTxt.charAt(i))) {
+                JOptionPane.showMessageDialog(this, "La cantidad debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
         }
-        if (esNumero) {
-            BigDecimal[] r = OperacionesVenta.calcular(new BigDecimal(v), (String) this.comboIva.getSelectedItem());
-            this.textTotal.setText(Tablas.dinero(r[0]));
-        } else {
-            this.textTotal.setText("");
+        int cant = Integer.parseInt(cantTxt);
+        if (cant <= 0) {
+            JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-    }//GEN-LAST:event_comboIvaActionPerformed
+
+        Producto p = OperacionesProducto.buscar(idProd);
+        if (p.getVencimiento().isBefore(LocalDate.now())) {
+            JOptionPane.showMessageDialog(this, "El producto está vencido, no se puede vender", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int enResumen = 0;
+        for (int i = 0; i < this.carrito.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
+            if (pv.getIdProducto() == idProd) {
+                enResumen = enResumen + (int) pv.getCantidad();
+            }
+        }
+        if (cant + enResumen > p.getExistencia()) {
+            JOptionPane.showMessageDialog(this, "No hay existencia suficiente. Quedan " + (p.getExistencia() - enResumen) + " unidades", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        boolean estaba = false;
+        for (int i = 0; i < this.carrito.size(); i++) {
+            ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
+            if (pv.getIdProducto() == idProd) {
+                pv.setCantidad(pv.getCantidad() + cant);
+                estaba = true;
+            }
+        }
+        if (!estaba) {
+            this.carrito.add(new ProductoVendido(0, idProd, 0, cant, p.getPrecioVenta()));
+        }
+
+        this.textCantidad.setText("");
+        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+        Estilo.ajustarColumnas(this.tablaProductos);
+        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnQuitarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitarActionPerformed
+        int fila = this.tablaProductos.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Elige un producto del resumen para quitarlo", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        this.carrito.remove(fila);
+        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+        Estilo.ajustarColumnas(this.tablaProductos);
+        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+    }//GEN-LAST:event_btnQuitarActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         int idCli = -1;
@@ -258,46 +345,40 @@ public class FormVenta extends javax.swing.JFrame {
         }
         String pago = (String) this.comboPago.getSelectedItem();
         LocalDateTime fecha = this.fechaVenta.getValor();
-        String valTxt = this.textValor.getText().trim();
-        String iva = (String) this.comboIva.getSelectedItem();
 
         if (idCli == -1) {
             JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (valTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (valTxt.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El valor debe ser un número (máximo 10 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < valTxt.length(); i++) {
-            if (!Character.isDigit(valTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El valor debe ser un número (máximo 10 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        if (Long.parseLong(valTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "El valor debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
             JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        if (this.carrito.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Agrega al menos un producto a la venta", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String falta = Hotel.sinExistencia(this.carrito);
+        if (falta != null) {
+            JOptionPane.showMessageDialog(this, "No hay existencia suficiente de " + falta, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        BigDecimal[] r = OperacionesVenta.calcular(new BigDecimal(valTxt), iva);
-        Venta v = new Venta(OperacionesVenta.nuevoId(), fecha, r[0], r[1], r[2], r[3], pago, idCli);
+        BigDecimal[] r = Hotel.totalesVenta(this.carrito);
+        long id = OperacionesVenta.nuevoId();
+        Venta v = new Venta(id, fecha, r[0], r[1], r[2], r[3], pago, idCli);
         OperacionesVenta.Guardar(v);
+        Hotel.guardarProductos(id, this.carrito);
         JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
         this.idSel = 0;
         this.comboPago.setSelectedIndex(0);
         this.fechaVenta.setValor(LocalDateTime.now());
-        this.textValor.setText("");
-        this.comboIva.setSelectedIndex(0);
+        this.textCantidad.setText("");
+        this.carrito = new LinkedList();
+        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+        Estilo.ajustarColumnas(this.tablaProductos);
+        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
         this.tabla.setModel(OperacionesVenta.modeloVenta());
         Estilo.ajustarColumnas(this.tabla);
     }//GEN-LAST:event_btnGuardarActionPerformed
@@ -339,15 +420,11 @@ public class FormVenta extends javax.swing.JFrame {
             }
             this.comboPago.setSelectedItem(v2.getTipoPago());
             this.fechaVenta.setValor(v2.getFecha());
-            BigDecimal base = v2.getTotal().subtract(v2.getIva5()).subtract(v2.getIva19());
-            this.textValor.setText("" + base.intValue());
-            if (v2.getIva5().signum() > 0) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (v2.getIva19().signum() > 0) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
-            }
+            this.carrito = Hotel.productosDeVenta(v2.getIdVenta());
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            this.textTotal.setText(Tablas.dinero(v2.getTotal()));
             for (int i = 0; i < this.tabla.getRowCount(); i++) {
                 if ((long) this.tabla.getValueAt(i, 0) == this.idSel) {
                     this.tabla.setRowSelectionInterval(i, i);
@@ -363,8 +440,11 @@ public class FormVenta extends javax.swing.JFrame {
             this.idSel = 0;
             this.comboPago.setSelectedIndex(0);
             this.fechaVenta.setValor(LocalDateTime.now());
-            this.textValor.setText("");
-            this.comboIva.setSelectedIndex(0);
+            this.textCantidad.setText("");
+            this.carrito = new LinkedList();
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
@@ -379,39 +459,18 @@ public class FormVenta extends javax.swing.JFrame {
         }
         String pago = (String) this.comboPago.getSelectedItem();
         LocalDateTime fecha = this.fechaVenta.getValor();
-        String valTxt = this.textValor.getText().trim();
-        String iva = (String) this.comboIva.getSelectedItem();
 
         if (idCli == -1) {
             JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (valTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (valTxt.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El valor debe ser un número (máximo 10 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < valTxt.length(); i++) {
-            if (!Character.isDigit(valTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El valor debe ser un número (máximo 10 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        if (Long.parseLong(valTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "El valor debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
             JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        BigDecimal[] r = OperacionesVenta.calcular(new BigDecimal(valTxt), iva);
-        if (OperacionesVenta.modificar(this.idSel, fecha, r[0], r[1], r[2], r[3], pago, idCli)) {
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la venta", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        Venta actual = OperacionesVenta.buscar(this.idSel);
+        if (OperacionesVenta.modificar(this.idSel, fecha, actual.getTotal(), actual.getIva5(), actual.getIva19(), actual.getExento(), pago, idCli)) {
+            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la venta. Los productos de una venta guardada no cambian", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this, "Venta no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -419,8 +478,11 @@ public class FormVenta extends javax.swing.JFrame {
         this.idSel = 0;
         this.comboPago.setSelectedIndex(0);
         this.fechaVenta.setValor(LocalDateTime.now());
-        this.textValor.setText("");
-        this.comboIva.setSelectedIndex(0);
+        this.textCantidad.setText("");
+        this.carrito = new LinkedList();
+        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+        Estilo.ajustarColumnas(this.tablaProductos);
+        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
         this.tabla.setModel(OperacionesVenta.modeloVenta());
         Estilo.ajustarColumnas(this.tabla);
     }//GEN-LAST:event_btnModificarActionPerformed
@@ -430,11 +492,12 @@ public class FormVenta extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Elige una venta de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la venta " + this.idSel + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la venta " + this.idSel + "? Los productos vuelven al inventario", "Confirmar", JOptionPane.YES_NO_OPTION);
         if (resp != JOptionPane.YES_OPTION) {
             return;
         }
 
+        Hotel.devolverProductos(this.idSel);
         if (OperacionesVenta.eliminar(this.idSel)) {
             JOptionPane.showMessageDialog(this, "Venta eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -444,8 +507,11 @@ public class FormVenta extends javax.swing.JFrame {
         this.idSel = 0;
         this.comboPago.setSelectedIndex(0);
         this.fechaVenta.setValor(LocalDateTime.now());
-        this.textValor.setText("");
-        this.comboIva.setSelectedIndex(0);
+        this.textCantidad.setText("");
+        this.carrito = new LinkedList();
+        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+        Estilo.ajustarColumnas(this.tablaProductos);
+        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
         this.tabla.setModel(OperacionesVenta.modeloVenta());
         Estilo.ajustarColumnas(this.tabla);
     }//GEN-LAST:event_btnEliminarActionPerformed
@@ -462,15 +528,11 @@ public class FormVenta extends javax.swing.JFrame {
             }
             this.comboPago.setSelectedItem(v.getTipoPago());
             this.fechaVenta.setValor(v.getFecha());
-            BigDecimal base = v.getTotal().subtract(v.getIva5()).subtract(v.getIva19());
-            this.textValor.setText("" + base.intValue());
-            if (v.getIva5().signum() > 0) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (v.getIva19().signum() > 0) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
-            }
+            this.carrito = Hotel.productosDeVenta(v.getIdVenta());
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            this.textTotal.setText(Tablas.dinero(v.getTotal()));
         }
     }//GEN-LAST:event_tablaMouseReleased
 
@@ -486,26 +548,24 @@ public class FormVenta extends javax.swing.JFrame {
             }
             this.comboPago.setSelectedItem(v.getTipoPago());
             this.fechaVenta.setValor(v.getFecha());
-            BigDecimal base = v.getTotal().subtract(v.getIva5()).subtract(v.getIva19());
-            this.textValor.setText("" + base.intValue());
-            if (v.getIva5().signum() > 0) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (v.getIva19().signum() > 0) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
-            }
+            this.carrito = Hotel.productosDeVenta(v.getIdVenta());
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            this.textTotal.setText(Tablas.dinero(v.getTotal()));
         }
     }//GEN-LAST:event_tablaKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAgregar;
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnQuitar;
     private javax.swing.JComboBox<String> comboCliente;
-    private javax.swing.JComboBox<String> comboIva;
     private javax.swing.JComboBox<String> comboPago;
+    private javax.swing.JComboBox<String> comboProducto;
     private gui.SelectorFecha fechaVenta;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -515,8 +575,10 @@ public class FormVenta extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable tabla;
+    private javax.swing.JTable tablaProductos;
+    private javax.swing.JTextField textCantidad;
     private javax.swing.JTextField textTotal;
-    private javax.swing.JTextField textValor;
     // End of variables declaration//GEN-END:variables
 }

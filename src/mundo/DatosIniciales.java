@@ -3,6 +3,7 @@ package mundo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 
 public class DatosIniciales {
 
@@ -55,13 +56,33 @@ public class DatosIniciales {
         OperacionesProducto.Guardar(new Producto(OperacionesProducto.nuevoId(), "P005", "Jabón de baño", new BigDecimal("2000"), new BigDecimal("900"), 19, 30, 0, 3, dia.plusDays(700)));
         OperacionesProducto.Guardar(new Producto(OperacionesProducto.nuevoId(), "P006", "Cerveza nacional", new BigDecimal("5000"), new BigDecimal("2200"), 5, 40, 0, 4, dia.plusDays(240)));
 
-        BigDecimal[] v1 = OperacionesVenta.calcular(new BigDecimal("60000"), "19%");
-        OperacionesVenta.Guardar(new Venta(OperacionesVenta.nuevoId(), hoy.withHour(9), v1[0], v1[1], v1[2], v1[3], "Efectivo", 1));
-        BigDecimal[] v2 = OperacionesVenta.calcular(new BigDecimal("150000"), "Exento");
-        OperacionesVenta.Guardar(new Venta(OperacionesVenta.nuevoId(), hoy.minusDays(1).withHour(18), v2[0], v2[1], v2[2], v2[3], "Tarjeta", 2));
-        BigDecimal[] v3 = OperacionesVenta.calcular(new BigDecimal("45000"), "5%");
-        OperacionesVenta.Guardar(new Venta(OperacionesVenta.nuevoId(), hoy.withHour(11), v3[0], v3[1], v3[2], v3[3], "Transferencia", 1));
+        LinkedList<ProductoVendido> items = new LinkedList();
+        items.add(linea(1, 2));
+        items.add(linea(2, 1));
+        venta(hoy.withHour(9), "Efectivo", 1, items);
+
+        items = new LinkedList();
+        items.add(linea(1, 4));
+        items.add(linea(3, 2));
+        venta(hoy.minusDays(1).withHour(18), "Tarjeta", 2, items);
+
+        items = new LinkedList();
+        items.add(linea(6, 6));
+        items.add(linea(4, 2));
+        venta(hoy.withHour(11), "Transferencia", 1, items);
 
         Hotel.actualizarTodas();
+    }
+
+    private static ProductoVendido linea(long idProducto, long cantidad) {
+        Producto p = OperacionesProducto.buscar(idProducto);
+        return new ProductoVendido(0, idProducto, 0, cantidad, p.getPrecioVenta());
+    }
+
+    private static void venta(LocalDateTime fecha, String pago, int idCliente, LinkedList<ProductoVendido> items) {
+        BigDecimal[] r = Hotel.totalesVenta(items);
+        long id = OperacionesVenta.nuevoId();
+        OperacionesVenta.Guardar(new Venta(id, fecha, r[0], r[1], r[2], r[3], pago, idCliente));
+        Hotel.guardarProductos(id, items);
     }
 }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.swing.JOptionPane;
 import mundo.Categoria;
+import mundo.Hotel;
 import mundo.OperacionesCategoria;
 import mundo.OperacionesProducto;
 import mundo.Producto;
@@ -509,6 +510,10 @@ public class FormProducto extends javax.swing.JFrame {
         Producto actual = OperacionesProducto.buscar(this.idSel);
         if (actual == null) {
             JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (Hotel.productoTieneVentas(this.idSel)) {
+            JOptionPane.showMessageDialog(this, "No se puede eliminar: el producto tiene ventas registradas", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar el producto " + actual.getDescripcion() + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
