@@ -46,11 +46,11 @@ public class Reserva {
    return idHabitacion;
    }
    
-   public void setIdHabiatcion(int idHabitacion){
+   public void setIdHabitacion(int idHabitacion){
    this.idHabitacion = idHabitacion;
    }
    
-   public LocalDateTime getFechaentrada(){
+   public LocalDateTime getFechaEntrada(){
    return fechaEntrada;
    }
    

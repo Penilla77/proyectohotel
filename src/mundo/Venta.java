@@ -32,7 +32,7 @@ public class Venta {
     return idVenta;
     }
     
-    public void setIdventa(long idVenta){
+    public void setIdVenta(long idVenta){
     this.idVenta = idVenta;
     }
     

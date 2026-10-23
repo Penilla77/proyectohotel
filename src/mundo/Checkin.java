@@ -35,7 +35,7 @@ public class Checkin {
     return idCheckin;
     }
     
-    public void setIdCheckin(){
+    public void setIdCheckin(int idCheckin){
     this.idCheckin = idCheckin;
     }
     
@@ -49,6 +49,10 @@ public class Checkin {
     
     public LocalDateTime getFechaSalida(){
     return fechaSalida;
+    }
+    
+    public void setFechaSalida(LocalDateTime fechaSalida){
+    this.fechaSalida = fechaSalida;
     }
     
     public int getNoches(){

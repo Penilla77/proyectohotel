@@ -76,7 +76,7 @@ public class Habitacion {
     return idCliente;
     }
     
-    public void setIdcliente(int idCliente){
+    public void setIdCliente(int idCliente){
     this.idCliente = idCliente;
     }
 }

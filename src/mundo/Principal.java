@@ -4,13 +4,14 @@
  */
 package mundo;
 
-/**
- *
- * @author Aula 103
- */
+import gui.Menu;
 public class Principal {
     public static void main(String[] args) {
        
+        mundo.DatosIniciales.cargar();
+        gui.Estilo.instalar();
+        Menu x = new Menu();
+        x.setVisible(true);
         
         
     }
