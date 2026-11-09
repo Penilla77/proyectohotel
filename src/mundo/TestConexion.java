@@ -22,7 +22,8 @@ public class TestConexion {
             System.out.println("¡Conexión exitosa!");
 
             // Realiza una consulta simple
-            ResultSet rs = conexion.consultar("SELECT * FROM cliente LIMIT 10"); // Ajusta la tabla según tu esquema
+            ResultSet rs = conexion.consultar("SELECT * FROM cliente LIMIT 1"
+                    + ""); // Ajusta la tabla según tu esquema
             while (rs.next()) {
                 System.out.println("Registro encontrado: " + rs.getString(1));  // Imprime el primer campo del primer registro
             }
