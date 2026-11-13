@@ -11,22 +11,26 @@ public class FormHabitacion extends javax.swing.JFrame {
     private int idSel = 0;
 
     public FormHabitacion() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesHabitacion.modeloHabitacion());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesHabitacion.modeloHabitacion());
+            Estilo.tabla(tabla);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -192,229 +196,253 @@ public class FormHabitacion extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        String num = this.textNumero.getText().trim();
-        String est = (String) this.textEstado.getSelectedItem();
-        String tipo = (String) this.textTipo.getSelectedItem();
-        String precioTxt = this.textPrecio.getText().trim();
-        int cap = Integer.parseInt((String) this.textCapacidad.getSelectedItem());
+        try {
+            String num = this.textNumero.getText().trim();
+            String est = (String) this.textEstado.getSelectedItem();
+            String tipo = (String) this.textTipo.getSelectedItem();
+            String precioTxt = this.textPrecio.getText().trim();
+            int cap = Integer.parseInt((String) this.textCapacidad.getSelectedItem());
 
-        if (num.isEmpty() || precioTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (num.length() > 6) {
-            JOptionPane.showMessageDialog(this, "El número puede tener máximo 6 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (OperacionesHabitacion.buscarPorNumero(num) != null) {
-            JOptionPane.showMessageDialog(this, "Ya existe una habitación con ese número", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (precioTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < precioTxt.length(); i++) {
-            if (!Character.isDigit(precioTxt.charAt(i))) {
+            if (num.isEmpty() || precioTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (num.length() > 6) {
+                JOptionPane.showMessageDialog(this, "El número puede tener máximo 6 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (OperacionesHabitacion.buscarPorNumero(num) != null) {
+                JOptionPane.showMessageDialog(this, "Ya existe una habitación con ese número", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (precioTxt.length() > 9) {
                 JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (Integer.parseInt(precioTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "El precio debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (est.equals("Reservada") || est.equals("Ocupada")) {
-            JOptionPane.showMessageDialog(this, "Reservada y Ocupada se asignan solas desde Reservas y Check-in", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        int id = OperacionesHabitacion.nuevoId();
-        Habitacion h = new Habitacion(id, num, est, tipo, new BigDecimal(precioTxt), cap, 0);
-        OperacionesHabitacion.Guardar(h);
-        Hotel.actualizarHabitacion(id);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.idSel = 0;
-        this.textNumero.setText("");
-        this.textEstado.setSelectedIndex(0);
-        this.textTipo.setSelectedIndex(0);
-        this.textPrecio.setText("");
-        this.textCapacidad.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id de la Habitacion",
-                "Datos de la Habitacion",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        Habitacion h2 = (Habitacion) OperacionesHabitacion.buscar(Integer.parseInt(id.trim()));
-
-        if (h2 != null) {
-            this.idSel = h2.getId();
-            this.textNumero.setText(h2.getNumero());
-            this.textEstado.setSelectedItem(h2.getEstado());
-            this.textTipo.setSelectedItem(h2.getTipoHabitacion());
-            this.textPrecio.setText("" + h2.getPrecioNoche());
-            this.textCapacidad.setSelectedItem("" + h2.getCapacidad());
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
+            for (int i = 0; i < precioTxt.length(); i++) {
+                if (!Character.isDigit(precioTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Habitacion no encontrada",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            if (Integer.parseInt(precioTxt) <= 0) {
+                JOptionPane.showMessageDialog(this, "El precio debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (est.equals("Reservada") || est.equals("Ocupada")) {
+                JOptionPane.showMessageDialog(this, "Reservada y Ocupada se asignan solas desde Reservas y Check-in", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int id = OperacionesHabitacion.nuevoId();
+            Habitacion h = new Habitacion(id, num, est, tipo, new BigDecimal(precioTxt), cap, 0);
+            OperacionesHabitacion.Guardar(h);
+            Hotel.actualizarHabitacion(id);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
             this.idSel = 0;
             this.textNumero.setText("");
             this.textEstado.setSelectedIndex(0);
             this.textTipo.setSelectedIndex(0);
             this.textPrecio.setText("");
             this.textCapacidad.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id de la Habitacion",
+                    "Datos de la Habitacion",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Habitacion h2 = (Habitacion) OperacionesHabitacion.buscar(Integer.parseInt(id.trim()));
+
+            if (h2 != null) {
+                this.idSel = h2.getId();
+                this.textNumero.setText(h2.getNumero());
+                this.textEstado.setSelectedItem(h2.getEstado());
+                this.textTipo.setSelectedItem(h2.getTipoHabitacion());
+                this.textPrecio.setText("" + h2.getPrecioNoche().intValue());
+                this.textCapacidad.setSelectedItem("" + h2.getCapacidad());
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Habitacion no encontrada",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.textNumero.setText("");
+                this.textEstado.setSelectedIndex(0);
+                this.textTipo.setSelectedIndex(0);
+                this.textPrecio.setText("");
+                this.textCapacidad.setSelectedIndex(0);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una habitación de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String num = this.textNumero.getText().trim();
-        String est = (String) this.textEstado.getSelectedItem();
-        String tipo = (String) this.textTipo.getSelectedItem();
-        String precioTxt = this.textPrecio.getText().trim();
-        int cap = Integer.parseInt((String) this.textCapacidad.getSelectedItem());
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una habitación de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String num = this.textNumero.getText().trim();
+            String est = (String) this.textEstado.getSelectedItem();
+            String tipo = (String) this.textTipo.getSelectedItem();
+            String precioTxt = this.textPrecio.getText().trim();
+            int cap = Integer.parseInt((String) this.textCapacidad.getSelectedItem());
 
-        if (num.isEmpty() || precioTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (num.length() > 6) {
-            JOptionPane.showMessageDialog(this, "El número puede tener máximo 6 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Habitacion otra = OperacionesHabitacion.buscarPorNumero(num);
-        if (otra != null && otra.getId() != this.idSel) {
-            JOptionPane.showMessageDialog(this, "Ya existe otra habitación con ese número", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (precioTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < precioTxt.length(); i++) {
-            if (!Character.isDigit(precioTxt.charAt(i))) {
+            if (num.isEmpty() || precioTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (num.length() > 6) {
+                JOptionPane.showMessageDialog(this, "El número puede tener máximo 6 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Habitacion otra = OperacionesHabitacion.buscarPorNumero(num);
+            if (otra != null && otra.getId() != this.idSel) {
+                JOptionPane.showMessageDialog(this, "Ya existe otra habitación con ese número", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (precioTxt.length() > 9) {
                 JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (Integer.parseInt(precioTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "El precio debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Habitacion actual = OperacionesHabitacion.buscar(this.idSel);
-        if ((est.equals("Reservada") || est.equals("Ocupada")) && !est.equals(actual.getEstado())) {
-            JOptionPane.showMessageDialog(this, "Reservada y Ocupada se asignan solas desde Reservas y Check-in", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            for (int i = 0; i < precioTxt.length(); i++) {
+                if (!Character.isDigit(precioTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio debe ser un número (máximo 9 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (Integer.parseInt(precioTxt) <= 0) {
+                JOptionPane.showMessageDialog(this, "El precio debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Habitacion actual = OperacionesHabitacion.buscar(this.idSel);
+            if ((est.equals("Reservada") || est.equals("Ocupada")) && !est.equals(actual.getEstado())) {
+                JOptionPane.showMessageDialog(this, "Reservada y Ocupada se asignan solas desde Reservas y Check-in", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (OperacionesHabitacion.modificar(this.idSel, num, est, tipo, new BigDecimal(precioTxt), cap)) {
-            Hotel.actualizarHabitacion(this.idSel);
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la habitacion", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Habitacion no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesHabitacion.modificar(this.idSel, num, est, tipo, new BigDecimal(precioTxt), cap)) {
+                Hotel.actualizarHabitacion(this.idSel);
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la habitacion", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Habitacion no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textNumero.setText("");
-        this.textEstado.setSelectedIndex(0);
-        this.textTipo.setSelectedIndex(0);
-        this.textPrecio.setText("");
-        this.textCapacidad.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textNumero.setText("");
+            this.textEstado.setSelectedIndex(0);
+            this.textTipo.setSelectedIndex(0);
+            this.textPrecio.setText("");
+            this.textCapacidad.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una habitación de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (Hotel.habitacionTieneRegistros(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "No se puede eliminar: la habitación tiene reservas activas o check-in", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la habitación " + OperacionesHabitacion.numero(this.idSel) + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una habitación de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.habitacionTieneRegistros(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "No se puede eliminar: la habitación tiene reservas activas o check-in", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la habitación " + OperacionesHabitacion.numero(this.idSel) + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        if (OperacionesHabitacion.eliminar(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "Habitacion eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Habitacion no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesHabitacion.eliminar(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "Habitacion eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Habitacion no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textNumero.setText("");
-        this.textEstado.setSelectedIndex(0);
-        this.textTipo.setSelectedIndex(0);
-        this.textPrecio.setText("");
-        this.textCapacidad.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textNumero.setText("");
+            this.textEstado.setSelectedIndex(0);
+            this.textTipo.setSelectedIndex(0);
+            this.textPrecio.setText("");
+            this.textCapacidad.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesHabitacion.modeloHabitacion());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Habitacion h = OperacionesHabitacion.buscar(this.idSel);
-            this.textNumero.setText(h.getNumero());
-            this.textEstado.setSelectedItem(h.getEstado());
-            this.textTipo.setSelectedItem(h.getTipoHabitacion());
-            this.textPrecio.setText("" + h.getPrecioNoche());
-            this.textCapacidad.setSelectedItem("" + h.getCapacidad());
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Habitacion h = OperacionesHabitacion.buscar(this.idSel);
+                this.textNumero.setText(h.getNumero());
+                this.textEstado.setSelectedItem(h.getEstado());
+                this.textTipo.setSelectedItem(h.getTipoHabitacion());
+                this.textPrecio.setText("" + h.getPrecioNoche().intValue());
+                this.textCapacidad.setSelectedItem("" + h.getCapacidad());
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Habitacion h = OperacionesHabitacion.buscar(this.idSel);
-            this.textNumero.setText(h.getNumero());
-            this.textEstado.setSelectedItem(h.getEstado());
-            this.textTipo.setSelectedItem(h.getTipoHabitacion());
-            this.textPrecio.setText("" + h.getPrecioNoche());
-            this.textCapacidad.setSelectedItem("" + h.getCapacidad());
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Habitacion h = OperacionesHabitacion.buscar(this.idSel);
+                this.textNumero.setText(h.getNumero());
+                this.textEstado.setSelectedItem(h.getEstado());
+                this.textTipo.setSelectedItem(h.getTipoHabitacion());
+                this.textPrecio.setText("" + h.getPrecioNoche().intValue());
+                this.textCapacidad.setSelectedItem("" + h.getCapacidad());
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

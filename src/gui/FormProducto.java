@@ -15,28 +15,32 @@ public class FormProducto extends javax.swing.JFrame {
     private long idSel = 0;
 
     public FormProducto() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
-        this.comboCategoria.removeAllItems();
-        for (Categoria x : OperacionesCategoria.lcat) {
-            this.comboCategoria.addItem(x.getCodCategoria() + " - " + x.getDetalle());
-        }
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
+            this.comboCategoria.removeAllItems();
+            for (Categoria x : OperacionesCategoria.listar()) {
+                this.comboCategoria.addItem(x.getCodCategoria() + " - " + x.getDetalle());
+            }
 
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesProducto.modeloProducto());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesProducto.modeloProducto());
+            Estilo.tabla(tabla);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -224,165 +228,97 @@ public class FormProducto extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        String cod = this.textCodigo.getText().trim();
-        String desc = this.textDescripcion.getText().trim();
-        int idCat = -1;
-        if (this.comboCategoria.getItemCount() > 0) {
-            idCat = Integer.parseInt(this.comboCategoria.getSelectedItem().toString().split(" - ")[0]);
-        }
-        String ivaTxt = (String) this.comboIva.getSelectedItem();
-        String compraTxt = this.textCompra.getText().trim();
-        String ventaTxt = this.textVenta.getText().trim();
-        String existTxt = this.textExistencia.getText().trim();
-        LocalDate venc = this.fechaVencimiento.getValor().toLocalDate();
+        try {
+            String cod = this.textCodigo.getText().trim();
+            String desc = this.textDescripcion.getText().trim();
+            int idCat = -1;
+            if (this.comboCategoria.getItemCount() > 0) {
+                idCat = Integer.parseInt(this.comboCategoria.getSelectedItem().toString().split(" - ")[0]);
+            }
+            String ivaTxt = (String) this.comboIva.getSelectedItem();
+            String compraTxt = this.textCompra.getText().trim();
+            String ventaTxt = this.textVenta.getText().trim();
+            String existTxt = this.textExistencia.getText().trim();
+            LocalDate venc = this.fechaVencimiento.getValor().toLocalDate();
 
-        if (cod.isEmpty() || desc.isEmpty() || compraTxt.isEmpty() || ventaTxt.isEmpty() || existTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (idCat == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos una categoría", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (cod.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El código puede tener máximo 10 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (desc.length() > 40) {
-            JOptionPane.showMessageDialog(this, "La descripción puede tener máximo 40 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (compraTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio de compra puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < compraTxt.length(); i++) {
-            if (!Character.isDigit(compraTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El precio de compra debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (cod.isEmpty() || desc.isEmpty() || compraTxt.isEmpty() || ventaTxt.isEmpty() || existTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (ventaTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio de venta puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < ventaTxt.length(); i++) {
-            if (!Character.isDigit(ventaTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El precio de venta debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (idCat == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos una categoría", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (existTxt.length() > 6) {
-            JOptionPane.showMessageDialog(this, "La existencia puede tener máximo 6 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < existTxt.length(); i++) {
-            if (!Character.isDigit(existTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "La existencia debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (cod.length() > 10) {
+                JOptionPane.showMessageDialog(this, "El código puede tener máximo 10 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (Integer.parseInt(compraTxt) <= 0 || Integer.parseInt(ventaTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "Los precios deben ser mayores a 0", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (Integer.parseInt(ventaTxt) < Integer.parseInt(compraTxt)) {
-            JOptionPane.showMessageDialog(this, "El precio de venta no puede ser menor al de compra", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (venc.isBefore(LocalDate.now())) {
-            JOptionPane.showMessageDialog(this, "La fecha de vencimiento ya pasó", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int iva = 0;
-        if (ivaTxt.equals("5%")) {
-            iva = 5;
-        }
-        if (ivaTxt.equals("19%")) {
-            iva = 19;
-        }
-        if (OperacionesProducto.buscarPorCodigo(cod) != null) {
-            JOptionPane.showMessageDialog(this, "Ya existe un producto con ese código", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Producto p = new Producto(OperacionesProducto.nuevoId(), cod, desc, new BigDecimal(ventaTxt), new BigDecimal(compraTxt), iva, Integer.parseInt(existTxt), 0, idCat, venc);
-        OperacionesProducto.Guardar(p);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.idSel = 0;
-        this.textCodigo.setText("");
-        this.textDescripcion.setText("");
-        this.comboCategoria.setSelectedIndex(0);
-        this.comboIva.setSelectedIndex(0);
-        this.textCompra.setText("");
-        this.textVenta.setText("");
-        this.textExistencia.setText("");
-        this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
-        this.tabla.setModel(OperacionesProducto.modeloProducto());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id del Producto",
-                "Datos del Producto",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (desc.length() > 40) {
+                JOptionPane.showMessageDialog(this, "La descripción puede tener máximo 40 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        Producto p2 = OperacionesProducto.buscar(Integer.parseInt(id.trim()));
-
-        if (p2 != null) {
-            this.idSel = p2.getIdProducto();
-            this.textCodigo.setText(p2.getCodigo());
-            this.textDescripcion.setText(p2.getDescripcion());
-            for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
-                if (this.comboCategoria.getItemAt(i).startsWith(p2.getCodcategoria() + " - ")) {
-                    this.comboCategoria.setSelectedIndex(i);
+            if (compraTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El precio de compra puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < compraTxt.length(); i++) {
+                if (!Character.isDigit(compraTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio de compra debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-            if (p2.getIva() == 5) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (p2.getIva() == 19) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
+            if (ventaTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El precio de venta puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-            this.textCompra.setText("" + p2.getPrecioCompra());
-            this.textVenta.setText("" + p2.getPrecioVenta());
-            this.textExistencia.setText("" + p2.getExistencia());
-            this.fechaVencimiento.setValor(p2.getVencimiento().atStartOfDay());
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((long) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
+            for (int i = 0; i < ventaTxt.length(); i++) {
+                if (!Character.isDigit(ventaTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio de venta debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Producto no encontrado",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            if (existTxt.length() > 6) {
+                JOptionPane.showMessageDialog(this, "La existencia puede tener máximo 6 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < existTxt.length(); i++) {
+                if (!Character.isDigit(existTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "La existencia debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (Integer.parseInt(compraTxt) <= 0 || Integer.parseInt(ventaTxt) <= 0) {
+                JOptionPane.showMessageDialog(this, "Los precios deben ser mayores a 0", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Integer.parseInt(ventaTxt) < Integer.parseInt(compraTxt)) {
+                JOptionPane.showMessageDialog(this, "El precio de venta no puede ser menor al de compra", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (venc.isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "La fecha de vencimiento ya pasó", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int iva = 0;
+            if (ivaTxt.equals("5%")) {
+                iva = 5;
+            }
+            if (ivaTxt.equals("19%")) {
+                iva = 19;
+            }
+            if (OperacionesProducto.buscarPorCodigo(cod) != null) {
+                JOptionPane.showMessageDialog(this, "Ya existe un producto con ese código", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (OperacionesCategoria.esHabitacion(idCat)) {
+                JOptionPane.showMessageDialog(this, "La categoría Habitación solo tiene el producto de alojamiento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Producto p = new Producto(OperacionesProducto.nuevoId(), cod, desc, new BigDecimal(ventaTxt), new BigDecimal(compraTxt), iva, Integer.parseInt(existTxt), 0, idCat, venc);
+            OperacionesProducto.Guardar(p);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
             this.idSel = 0;
             this.textCodigo.setText("");
             this.textDescripcion.setText("");
@@ -392,203 +328,307 @@ public class FormProducto extends javax.swing.JFrame {
             this.textVenta.setText("");
             this.textExistencia.setText("");
             this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
+            this.tabla.setModel(OperacionesProducto.modeloProducto());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id del Producto",
+                    "Datos del Producto",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Producto p2 = OperacionesProducto.buscar(Integer.parseInt(id.trim()));
+
+            if (p2 != null) {
+                this.idSel = p2.getIdProducto();
+                this.textCodigo.setText(p2.getCodigo());
+                this.textDescripcion.setText(p2.getDescripcion());
+                for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
+                    if (this.comboCategoria.getItemAt(i).startsWith(p2.getCodcategoria() + " - ")) {
+                        this.comboCategoria.setSelectedIndex(i);
+                    }
+                }
+                if (p2.getIva() == 5) {
+                    this.comboIva.setSelectedItem("5%");
+                } else if (p2.getIva() == 19) {
+                    this.comboIva.setSelectedItem("19%");
+                } else {
+                    this.comboIva.setSelectedItem("Exento");
+                }
+                this.textCompra.setText("" + p2.getPrecioCompra().intValue());
+                this.textVenta.setText("" + p2.getPrecioVenta().intValue());
+                this.textExistencia.setText("" + p2.getExistencia());
+                this.fechaVencimiento.setValor(p2.getVencimiento().atStartOfDay());
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((long) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Producto no encontrado",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.textCodigo.setText("");
+                this.textDescripcion.setText("");
+                this.comboCategoria.setSelectedIndex(0);
+                this.comboIva.setSelectedIndex(0);
+                this.textCompra.setText("");
+                this.textVenta.setText("");
+                this.textExistencia.setText("");
+                this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un producto de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String cod = this.textCodigo.getText().trim();
-        String desc = this.textDescripcion.getText().trim();
-        int idCat = -1;
-        if (this.comboCategoria.getItemCount() > 0) {
-            idCat = Integer.parseInt(this.comboCategoria.getSelectedItem().toString().split(" - ")[0]);
-        }
-        String ivaTxt = (String) this.comboIva.getSelectedItem();
-        String compraTxt = this.textCompra.getText().trim();
-        String ventaTxt = this.textVenta.getText().trim();
-        String existTxt = this.textExistencia.getText().trim();
-        LocalDate venc = this.fechaVencimiento.getValor().toLocalDate();
-
-        if (cod.isEmpty() || desc.isEmpty() || compraTxt.isEmpty() || ventaTxt.isEmpty() || existTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (idCat == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos una categoría", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (cod.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El código puede tener máximo 10 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (desc.length() > 40) {
-            JOptionPane.showMessageDialog(this, "La descripción puede tener máximo 40 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (compraTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio de compra puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < compraTxt.length(); i++) {
-            if (!Character.isDigit(compraTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El precio de compra debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un producto de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (ventaTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El precio de venta puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < ventaTxt.length(); i++) {
-            if (!Character.isDigit(ventaTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El precio de venta debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            String cod = this.textCodigo.getText().trim();
+            String desc = this.textDescripcion.getText().trim();
+            int idCat = -1;
+            if (this.comboCategoria.getItemCount() > 0) {
+                idCat = Integer.parseInt(this.comboCategoria.getSelectedItem().toString().split(" - ")[0]);
+            }
+            String ivaTxt = (String) this.comboIva.getSelectedItem();
+            String compraTxt = this.textCompra.getText().trim();
+            String ventaTxt = this.textVenta.getText().trim();
+            String existTxt = this.textExistencia.getText().trim();
+            LocalDate venc = this.fechaVencimiento.getValor().toLocalDate();
+
+            if (cod.isEmpty() || desc.isEmpty() || compraTxt.isEmpty() || ventaTxt.isEmpty() || existTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (existTxt.length() > 6) {
-            JOptionPane.showMessageDialog(this, "La existencia puede tener máximo 6 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < existTxt.length(); i++) {
-            if (!Character.isDigit(existTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "La existencia debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (idCat == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos una categoría", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (Integer.parseInt(compraTxt) <= 0 || Integer.parseInt(ventaTxt) <= 0) {
-            JOptionPane.showMessageDialog(this, "Los precios deben ser mayores a 0", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (Integer.parseInt(ventaTxt) < Integer.parseInt(compraTxt)) {
-            JOptionPane.showMessageDialog(this, "El precio de venta no puede ser menor al de compra", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (venc.isBefore(LocalDate.now())) {
-            JOptionPane.showMessageDialog(this, "La fecha de vencimiento ya pasó", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int iva = 0;
-        if (ivaTxt.equals("5%")) {
-            iva = 5;
-        }
-        if (ivaTxt.equals("19%")) {
-            iva = 19;
-        }
-        Producto otro = OperacionesProducto.buscarPorCodigo(cod);
-        if (otro != null && otro.getIdProducto() != this.idSel) {
-            JOptionPane.showMessageDialog(this, "Ya existe otro producto con ese código", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (cod.length() > 10) {
+                JOptionPane.showMessageDialog(this, "El código puede tener máximo 10 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (desc.length() > 40) {
+                JOptionPane.showMessageDialog(this, "La descripción puede tener máximo 40 caracteres", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (compraTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El precio de compra puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < compraTxt.length(); i++) {
+                if (!Character.isDigit(compraTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio de compra debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (ventaTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El precio de venta puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < ventaTxt.length(); i++) {
+                if (!Character.isDigit(ventaTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El precio de venta debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (existTxt.length() > 6) {
+                JOptionPane.showMessageDialog(this, "La existencia puede tener máximo 6 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < existTxt.length(); i++) {
+                if (!Character.isDigit(existTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "La existencia debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if ((Integer.parseInt(compraTxt) <= 0 || Integer.parseInt(ventaTxt) <= 0) && !Hotel.esHabitacion(OperacionesProducto.buscar(this.idSel))) {
+                JOptionPane.showMessageDialog(this, "Los precios deben ser mayores a 0", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Integer.parseInt(ventaTxt) < Integer.parseInt(compraTxt)) {
+                JOptionPane.showMessageDialog(this, "El precio de venta no puede ser menor al de compra", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (venc.isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "La fecha de vencimiento ya pasó", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int iva = 0;
+            if (ivaTxt.equals("5%")) {
+                iva = 5;
+            }
+            if (ivaTxt.equals("19%")) {
+                iva = 19;
+            }
+            Producto otro = OperacionesProducto.buscarPorCodigo(cod);
+            if (otro != null && otro.getIdProducto() != this.idSel) {
+                JOptionPane.showMessageDialog(this, "Ya existe otro producto con ese código", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.esHabitacion(OperacionesProducto.buscar(this.idSel)) != OperacionesCategoria.esHabitacion(idCat)) {
+                JOptionPane.showMessageDialog(this, "El producto de alojamiento no cambia de categoría, y ningún otro puede pasar a Habitación", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (OperacionesProducto.modificar(this.idSel, cod, desc, new BigDecimal(ventaTxt), new BigDecimal(compraTxt), iva, Integer.parseInt(existTxt), idCat, venc)) {
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el producto", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesProducto.modificar(this.idSel, cod, desc, new BigDecimal(ventaTxt), new BigDecimal(compraTxt), iva, Integer.parseInt(existTxt), idCat, venc)) {
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el producto", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textCodigo.setText("");
-        this.textDescripcion.setText("");
-        this.comboCategoria.setSelectedIndex(0);
-        this.comboIva.setSelectedIndex(0);
-        this.textCompra.setText("");
-        this.textVenta.setText("");
-        this.textExistencia.setText("");
-        this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
-        this.tabla.setModel(OperacionesProducto.modeloProducto());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textCodigo.setText("");
+            this.textDescripcion.setText("");
+            this.comboCategoria.setSelectedIndex(0);
+            this.comboIva.setSelectedIndex(0);
+            this.textCompra.setText("");
+            this.textVenta.setText("");
+            this.textExistencia.setText("");
+            this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
+            this.tabla.setModel(OperacionesProducto.modeloProducto());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un producto de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Producto actual = OperacionesProducto.buscar(this.idSel);
-        if (actual == null) {
-            JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (Hotel.productoTieneVentas(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "No se puede eliminar: el producto tiene ventas registradas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar el producto " + actual.getDescripcion() + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un producto de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Producto actual = OperacionesProducto.buscar(this.idSel);
+            if (actual == null) {
+                JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.esHabitacion(actual)) {
+                JOptionPane.showMessageDialog(this, "El producto de alojamiento no se puede eliminar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.productoTieneVentas(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "No se puede eliminar: el producto tiene ventas registradas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar el producto " + actual.getDescripcion() + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        if (OperacionesProducto.eliminar(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "Producto eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesProducto.eliminar(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "Producto eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Producto no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textCodigo.setText("");
-        this.textDescripcion.setText("");
-        this.comboCategoria.setSelectedIndex(0);
-        this.comboIva.setSelectedIndex(0);
-        this.textCompra.setText("");
-        this.textVenta.setText("");
-        this.textExistencia.setText("");
-        this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
-        this.tabla.setModel(OperacionesProducto.modeloProducto());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textCodigo.setText("");
+            this.textDescripcion.setText("");
+            this.comboCategoria.setSelectedIndex(0);
+            this.comboIva.setSelectedIndex(0);
+            this.textCompra.setText("");
+            this.textVenta.setText("");
+            this.textExistencia.setText("");
+            this.fechaVencimiento.setValor(LocalDateTime.now().plusDays(180));
+            this.tabla.setModel(OperacionesProducto.modeloProducto());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (long) this.tabla.getValueAt(fila, 0);
-            Producto p = OperacionesProducto.buscar(this.idSel);
-            this.textCodigo.setText(p.getCodigo());
-            this.textDescripcion.setText(p.getDescripcion());
-            for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
-                if (this.comboCategoria.getItemAt(i).startsWith(p.getCodcategoria() + " - ")) {
-                    this.comboCategoria.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (long) this.tabla.getValueAt(fila, 0);
+                Producto p = OperacionesProducto.buscar(this.idSel);
+                this.textCodigo.setText(p.getCodigo());
+                this.textDescripcion.setText(p.getDescripcion());
+                for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
+                    if (this.comboCategoria.getItemAt(i).startsWith(p.getCodcategoria() + " - ")) {
+                        this.comboCategoria.setSelectedIndex(i);
+                    }
                 }
+                if (p.getIva() == 5) {
+                    this.comboIva.setSelectedItem("5%");
+                } else if (p.getIva() == 19) {
+                    this.comboIva.setSelectedItem("19%");
+                } else {
+                    this.comboIva.setSelectedItem("Exento");
+                }
+                this.textCompra.setText("" + p.getPrecioCompra().intValue());
+                this.textVenta.setText("" + p.getPrecioVenta().intValue());
+                this.textExistencia.setText("" + p.getExistencia());
+                this.fechaVencimiento.setValor(p.getVencimiento().atStartOfDay());
             }
-            if (p.getIva() == 5) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (p.getIva() == 19) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
-            }
-            this.textCompra.setText("" + p.getPrecioCompra());
-            this.textVenta.setText("" + p.getPrecioVenta());
-            this.textExistencia.setText("" + p.getExistencia());
-            this.fechaVencimiento.setValor(p.getVencimiento().atStartOfDay());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (long) this.tabla.getValueAt(fila, 0);
-            Producto p = OperacionesProducto.buscar(this.idSel);
-            this.textCodigo.setText(p.getCodigo());
-            this.textDescripcion.setText(p.getDescripcion());
-            for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
-                if (this.comboCategoria.getItemAt(i).startsWith(p.getCodcategoria() + " - ")) {
-                    this.comboCategoria.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (long) this.tabla.getValueAt(fila, 0);
+                Producto p = OperacionesProducto.buscar(this.idSel);
+                this.textCodigo.setText(p.getCodigo());
+                this.textDescripcion.setText(p.getDescripcion());
+                for (int i = 0; i < this.comboCategoria.getItemCount(); i++) {
+                    if (this.comboCategoria.getItemAt(i).startsWith(p.getCodcategoria() + " - ")) {
+                        this.comboCategoria.setSelectedIndex(i);
+                    }
                 }
+                if (p.getIva() == 5) {
+                    this.comboIva.setSelectedItem("5%");
+                } else if (p.getIva() == 19) {
+                    this.comboIva.setSelectedItem("19%");
+                } else {
+                    this.comboIva.setSelectedItem("Exento");
+                }
+                this.textCompra.setText("" + p.getPrecioCompra().intValue());
+                this.textVenta.setText("" + p.getPrecioVenta().intValue());
+                this.textExistencia.setText("" + p.getExistencia());
+                this.fechaVencimiento.setValor(p.getVencimiento().atStartOfDay());
             }
-            if (p.getIva() == 5) {
-                this.comboIva.setSelectedItem("5%");
-            } else if (p.getIva() == 19) {
-                this.comboIva.setSelectedItem("19%");
-            } else {
-                this.comboIva.setSelectedItem("Exento");
-            }
-            this.textCompra.setText("" + p.getPrecioCompra());
-            this.textVenta.setText("" + p.getPrecioVenta());
-            this.textExistencia.setText("" + p.getExistencia());
-            this.fechaVencimiento.setValor(p.getVencimiento().atStartOfDay());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

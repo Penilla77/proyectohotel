@@ -1,4 +1,5 @@
 package gui;
+import javax.swing.JOptionPane;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -25,6 +26,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedList;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonModel;
@@ -55,7 +57,9 @@ import javax.swing.plaf.basic.BasicMenuItemUI;
 import javax.swing.plaf.basic.BasicMenuUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
+import mundo.Cliente;
 import mundo.Habitacion;
+import mundo.Hotel;
 import mundo.OperacionesCliente;
 import mundo.OperacionesHabitacion;
 import mundo.OperacionesReserva;
@@ -244,84 +248,103 @@ public final class Estilo {
     }
 
     private static void llenarMapa(JPanel mapa) {
-        mapa.removeAll();
-        for (int i = 0; i < OperacionesHabitacion.lh.size(); i++) {
-            Habitacion h = (Habitacion) OperacionesHabitacion.lh.get(i);
-            Color color = new Color(0x6B6F72);
-            if (h.getEstado().equals("Disponible")) {
-                color = new Color(0x2E7D4F);
-            }
-            if (h.getEstado().equals("Ocupada")) {
-                color = new Color(0xB5473B);
-            }
-            if (h.getEstado().equals("Reservada")) {
-                color = new Color(0xB7791F);
-            }
+        try {
+            mapa.removeAll();
+            LinkedList<Habitacion> lh = OperacionesHabitacion.listar();
+            LinkedList<Cliente> lc = OperacionesCliente.listar();
+            for (int i = 0; i < lh.size(); i++) {
+                Habitacion h = (Habitacion) lh.get(i);
+                Color color = new Color(0x6B6F72);
+                if (h.getEstado().equals("Disponible")) {
+                    color = new Color(0x2E7D4F);
+                }
+                if (h.getEstado().equals("Ocupada")) {
+                    color = new Color(0xB5473B);
+                }
+                if (h.getEstado().equals("Reservada")) {
+                    color = new Color(0xB7791F);
+                }
 
-            JLabel numero = new JLabel(h.getNumero());
-            numero.setFont(fuente(Font.BOLD, 26));
-            numero.setForeground(TEXTO);
-            JLabel tipo = new JLabel(h.getTipoHabitacion() + " · " + Tablas.dinero(h.getPrecioNoche()));
-            tipo.setFont(fuente(Font.PLAIN, 13));
-            tipo.setForeground(TEXTO_SUAVE);
-            String estado = h.getEstado();
-            if (h.getIdCliente() != 0) {
-                estado = estado + " · " + OperacionesCliente.nombreCompleto(h.getIdCliente());
+                JLabel numero = new JLabel(h.getNumero());
+                numero.setFont(fuente(Font.BOLD, 26));
+                numero.setForeground(TEXTO);
+                JLabel tipo = new JLabel(h.getTipoHabitacion() + " · " + Tablas.dinero(h.getPrecioNoche()));
+                tipo.setFont(fuente(Font.PLAIN, 13));
+                tipo.setForeground(TEXTO_SUAVE);
+                String estado = h.getEstado();
+                if (h.getIdCliente() != 0) {
+                    String nombre = "(eliminado)";
+                    for (int j = 0; j < lc.size(); j++) {
+                        if (lc.get(j).getId() == h.getIdCliente()) {
+                            nombre = lc.get(j).getNombre() + " " + lc.get(j).getApellido();
+                        }
+                    }
+                    estado = estado + " · " + nombre;
+                }
+                JLabel lblEstado = new JLabel(estado);
+                lblEstado.setFont(fuente(Font.BOLD, 12));
+                lblEstado.setForeground(color);
+
+                JPanel textos = new JPanel(new BorderLayout(0, 2));
+                textos.setOpaque(false);
+                textos.add(tipo, BorderLayout.NORTH);
+                textos.add(lblEstado, BorderLayout.SOUTH);
+
+                JPanel casilla = new JPanel(new BorderLayout(0, 14));
+                casilla.setBackground(PANEL);
+                casilla.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(5, 0, 0, 0, color),
+                        BorderFactory.createCompoundBorder(
+                                BorderFactory.createLineBorder(BORDE),
+                                BorderFactory.createEmptyBorder(12, 16, 12, 16))));
+                casilla.add(numero, BorderLayout.NORTH);
+                casilla.add(textos, BorderLayout.SOUTH);
+                mapa.add(casilla);
             }
-            JLabel lblEstado = new JLabel(estado);
-            lblEstado.setFont(fuente(Font.BOLD, 12));
-            lblEstado.setForeground(color);
-
-            JPanel textos = new JPanel(new BorderLayout(0, 2));
-            textos.setOpaque(false);
-            textos.add(tipo, BorderLayout.NORTH);
-            textos.add(lblEstado, BorderLayout.SOUTH);
-
-            JPanel casilla = new JPanel(new BorderLayout(0, 14));
-            casilla.setBackground(PANEL);
-            casilla.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(5, 0, 0, 0, color),
-                    BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(BORDE),
-                            BorderFactory.createEmptyBorder(12, 16, 12, 16))));
-            casilla.add(numero, BorderLayout.NORTH);
-            casilla.add(textos, BorderLayout.SOUTH);
-            mapa.add(casilla);
+            mapa.revalidate();
+            mapa.repaint();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        mapa.revalidate();
-        mapa.repaint();
     }
 
     private static void estadisticas(JLabel[] cifras) {
-        int libres = 0;
-        int ocupadas = 0;
-        for (int i = 0; i < OperacionesHabitacion.lh.size(); i++) {
-            Habitacion h = (Habitacion) OperacionesHabitacion.lh.get(i);
-            if (h.getEstado().equals("Disponible")) {
-                libres++;
+        try {
+            int libres = 0;
+            int ocupadas = 0;
+            LinkedList<Habitacion> lh = OperacionesHabitacion.listar();
+            for (int i = 0; i < lh.size(); i++) {
+                Habitacion h = (Habitacion) lh.get(i);
+                if (h.getEstado().equals("Disponible")) {
+                    libres++;
+                }
+                if (h.getEstado().equals("Ocupada")) {
+                    ocupadas++;
+                }
             }
-            if (h.getEstado().equals("Ocupada")) {
-                ocupadas++;
+            int reservas = 0;
+            LinkedList<Reserva> lr = OperacionesReserva.listar();
+            for (int i = 0; i < lr.size(); i++) {
+                Reserva r = (Reserva) lr.get(i);
+                if (Hotel.vigente(r.getEstado())) {
+                    reservas++;
+                }
             }
+            BigDecimal ventasHoy = BigDecimal.ZERO;
+            LinkedList<Venta> lv = OperacionesVenta.listar();
+            for (int i = 0; i < lv.size(); i++) {
+                Venta v = (Venta) lv.get(i);
+                if (v.getFecha().toLocalDate().equals(LocalDate.now())) {
+                    ventasHoy = ventasHoy.add(v.getTotal());
+                }
+            }
+            cifras[0].setText("" + libres);
+            cifras[1].setText("" + ocupadas);
+            cifras[2].setText("" + reservas);
+            cifras[3].setText(Tablas.dinero(ventasHoy));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        int reservas = 0;
-        for (int i = 0; i < OperacionesReserva.lr.size(); i++) {
-            Reserva r = (Reserva) OperacionesReserva.lr.get(i);
-            if (r.getEstado().equals("Activa")) {
-                reservas++;
-            }
-        }
-        BigDecimal ventasHoy = BigDecimal.ZERO;
-        for (int i = 0; i < OperacionesVenta.lv.size(); i++) {
-            Venta v = (Venta) OperacionesVenta.lv.get(i);
-            if (v.getFecha().toLocalDate().equals(LocalDate.now())) {
-                ventasHoy = ventasHoy.add(v.getTotal());
-            }
-        }
-        cifras[0].setText("" + libres);
-        cifras[1].setText("" + ocupadas);
-        cifras[2].setText("" + reservas);
-        cifras[3].setText(Tablas.dinero(ventasHoy));
     }
 
     private static void abrir(int cual) {
@@ -451,11 +474,11 @@ public final class Estilo {
                 if (!sel && valor instanceof String e) {
                     boolean osc = luminancia(PANEL) < 0.4;
                     Color k = null;
-                    if (e.equals("Disponible") || e.equals("Activa")) { k = osc ? new Color(0x57C48A) : new Color(0x2E7D4F); }
+                    if (e.equals("Disponible") || e.equals("CONFIRMADA")) { k = osc ? new Color(0x57C48A) : new Color(0x2E7D4F); }
                     if (e.equals("Ocupada")) { k = osc ? new Color(0xF0817D) : new Color(0xB5473B); }
-                    if (e.equals("Reservada")) { k = osc ? new Color(0xE6B450) : new Color(0xB7791F); }
-                    if (e.equals("Mantenimiento") || e.equals("Cancelada")) { k = osc ? new Color(0xA0A7AE) : new Color(0x6B6F72); }
-                    if (e.equals("Completada")) { k = osc ? new Color(0x7FA8F0) : new Color(0x3B6E8F); }
+                    if (e.equals("Reservada") || e.equals("PENDIENTE")) { k = osc ? new Color(0xE6B450) : new Color(0xB7791F); }
+                    if (e.equals("Mantenimiento") || e.equals("CANCELADA")) { k = osc ? new Color(0xA0A7AE) : new Color(0x6B6F72); }
+                    if (e.equals("FINALIZADA")) { k = osc ? new Color(0x7FA8F0) : new Color(0x3B6E8F); }
                     if (k != null) {
                         l.setBackground(mezclar(PANEL, k, osc ? 0.28 : 0.16));
                         l.setForeground(k);

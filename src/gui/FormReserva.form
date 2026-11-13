@@ -157,10 +157,9 @@
     <Component class="javax.swing.JComboBox" name="comboTipo">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="3">
-            <StringItem index="0" value="Web"/>
-            <StringItem index="1" value="Telefónica"/>
-            <StringItem index="2" value="Presencial"/>
+          <StringArray count="2">
+            <StringItem index="0" value="AIRBNB"/>
+            <StringItem index="1" value="OTRO"/>
           </StringArray>
         </Property>
       </Properties>
@@ -176,10 +175,11 @@
     <Component class="javax.swing.JComboBox" name="comboEstado">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="3">
-            <StringItem index="0" value="Activa"/>
-            <StringItem index="1" value="Cancelada"/>
-            <StringItem index="2" value="Completada"/>
+          <StringArray count="4">
+            <StringItem index="0" value="PENDIENTE"/>
+            <StringItem index="1" value="CONFIRMADA"/>
+            <StringItem index="2" value="CANCELADA"/>
+            <StringItem index="3" value="FINALIZADA"/>
           </StringArray>
         </Property>
       </Properties>

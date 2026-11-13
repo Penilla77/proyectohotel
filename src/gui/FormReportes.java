@@ -1,4 +1,5 @@
 package gui;
+import javax.swing.JOptionPane;
 
 import javax.swing.JTable;
 import mundo.Reportes;
@@ -6,22 +7,26 @@ import mundo.Reportes;
 public class FormReportes extends javax.swing.JFrame {
 
     public FormReportes() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        lblResumen.setFont(Estilo.fuente(java.awt.Font.BOLD, 13));
-        Estilo.boton(btnActualizar, Estilo.ACENTO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        int tipo = this.comboReporte.getSelectedIndex();
-        JTable t = Reportes.tabla(tipo);
-        Estilo.tabla(t);
-        this.jScrollPane1.setViewportView(t);
-        this.lblResumen.setText(Reportes.resumen(tipo));
-        pack();
-        setLocationRelativeTo(null);
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            lblResumen.setFont(Estilo.fuente(java.awt.Font.BOLD, 13));
+            Estilo.boton(btnActualizar, Estilo.ACENTO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            int tipo = this.comboReporte.getSelectedIndex();
+            JTable t = Reportes.tabla(tipo);
+            Estilo.tabla(t);
+            this.jScrollPane1.setViewportView(t);
+            this.lblResumen.setText(Reportes.resumen(tipo));
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -47,7 +52,7 @@ public class FormReportes extends javax.swing.JFrame {
 
         jLabel2.setText("Reporte");
 
-        comboReporte.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Estado de las habitaciones", "Reservas activas", "Huéspedes actuales", "Ventas de hoy", "Todas las ventas", "Resumen por cliente" }));
+        comboReporte.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Estado de las habitaciones", "Reservas activas", "Huéspedes actuales", "Ventas de hoy", "Todas las ventas", "Resumen por cliente", "Cuentas abiertas", "Historial de facturas" }));
         comboReporte.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 comboReporteActionPerformed(evt);
@@ -104,19 +109,27 @@ public class FormReportes extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void comboReporteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboReporteActionPerformed
-        int tipo = this.comboReporte.getSelectedIndex();
-        JTable t = Reportes.tabla(tipo);
-        Estilo.tabla(t);
-        this.jScrollPane1.setViewportView(t);
-        this.lblResumen.setText(Reportes.resumen(tipo));
+        try {
+            int tipo = this.comboReporte.getSelectedIndex();
+            JTable t = Reportes.tabla(tipo);
+            Estilo.tabla(t);
+            this.jScrollPane1.setViewportView(t);
+            this.lblResumen.setText(Reportes.resumen(tipo));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_comboReporteActionPerformed
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
-        int tipo = this.comboReporte.getSelectedIndex();
-        JTable t = Reportes.tabla(tipo);
-        Estilo.tabla(t);
-        this.jScrollPane1.setViewportView(t);
-        this.lblResumen.setText(Reportes.resumen(tipo));
+        try {
+            int tipo = this.comboReporte.getSelectedIndex();
+            JTable t = Reportes.tabla(tipo);
+            Estilo.tabla(t);
+            this.jScrollPane1.setViewportView(t);
+            this.lblResumen.setText(Reportes.resumen(tipo));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnActualizarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

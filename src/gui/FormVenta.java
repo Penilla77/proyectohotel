@@ -8,53 +8,64 @@ import javax.swing.JOptionPane;
 import mundo.Cliente;
 import mundo.Hotel;
 import mundo.OperacionesCliente;
+import mundo.OperacionesCuenta;
+import mundo.OperacionesHabitacion;
 import mundo.OperacionesProducto;
 import mundo.OperacionesProductoVendido;
 import mundo.OperacionesVenta;
 import mundo.Producto;
 import mundo.ProductoVendido;
+import mundo.Cuenta;
 import mundo.Tablas;
 import mundo.Venta;
 
 public class FormVenta extends javax.swing.JFrame {
 
     private long idSel = 0;
+    private int idCuentaSel = 0;
     private LinkedList<ProductoVendido> carrito = new LinkedList();
 
     public FormVenta() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        textTotal.setBackground(new java.awt.Color(0xEFEFEA));
-        Estilo.boton(btnAgregar, Estilo.ACENTO);
-        Estilo.boton(btnQuitar, Estilo.GRIS);
-        jScrollPane2.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane2.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        tablaProductos.setDefaultEditor(Object.class, null);
-        tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(carrito));
-        Estilo.tabla(tablaProductos);
-        this.comboCliente.removeAllItems();
-        for (Cliente x : OperacionesCliente.lc) {
-            this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
-        }
-        this.comboProducto.removeAllItems();
-        for (Producto x : OperacionesProducto.lp) {
-            this.comboProducto.addItem(x.getIdProducto() + " - " + x.getDescripcion() + " - " + Tablas.dinero(x.getPrecioVenta()));
-        }
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            textTotal.setBackground(new java.awt.Color(0xEFEFEA));
+            Estilo.boton(btnAgregar, Estilo.ACENTO);
+            Estilo.boton(btnQuitar, Estilo.GRIS);
+            jScrollPane2.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane2.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            tablaProductos.setDefaultEditor(Object.class, null);
+            tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(carrito));
+            Estilo.tabla(tablaProductos);
+            this.comboCliente.removeAllItems();
+            for (Cliente x : OperacionesCliente.listar()) {
+                this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
+            }
+            this.comboProducto.removeAllItems();
+            for (Producto x : OperacionesProducto.listar()) {
+                if (!Hotel.esHabitacion(x)) {
+                    this.comboProducto.addItem(x.getIdProducto() + " - " + x.getDescripcion() + " - " + Tablas.dinero(x.getPrecioVenta()));
+                }
+            }
 
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesVenta.modeloVenta());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesVenta.modeloVenta());
+            Estilo.tabla(tabla);
+            this.comboClienteActionPerformed(null);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -97,6 +108,12 @@ public class FormVenta extends javax.swing.JFrame {
 
         jLabel2.setText("Cliente");
 
+        comboCliente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboClienteActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Tipo de pago");
 
         comboPago.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Efectivo", "Tarjeta", "Transferencia" }));
@@ -124,7 +141,6 @@ public class FormVenta extends javax.swing.JFrame {
                 btnQuitarActionPerformed(evt);
             }
         });
-
         jScrollPane2.setPreferredSize(new java.awt.Dimension(900, 110));
         jScrollPane2.setViewportView(tablaProductos);
 
@@ -258,185 +274,185 @@ public class FormVenta extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void comboClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboClienteActionPerformed
+        try {
+            if (this.idSel != 0 || this.comboCliente.getItemCount() == 0 || this.comboCliente.getSelectedItem() == null) {
+                return;
+            }
+            int idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            Cuenta cu = OperacionesCuenta.buscarAbiertaDeCliente(idCli);
+            if (cu != null) {
+                this.idCuentaSel = cu.getIdCuenta();
+                this.carrito = Hotel.consumosDeCuenta(cu.getIdCuenta());
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                this.jLabel1.setText("Ventas · Cuenta " + cu.getIdCuenta() + " abierta · Habitación " + OperacionesHabitacion.numero(cu.getIdHabitacion()));
+                this.jLabel1.setForeground(Estilo.ACENTO);
+            } else if (this.idCuentaSel != 0) {
+                this.idCuentaSel = 0;
+                this.jLabel1.setText("Ventas");
+                this.jLabel1.setForeground(Estilo.TEXTO);
+                this.carrito = new LinkedList();
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_comboClienteActionPerformed
+
     private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
-        int idProd = -1;
-        if (this.comboProducto.getItemCount() > 0) {
-            idProd = Integer.parseInt(this.comboProducto.getSelectedItem().toString().split(" - ")[0]);
-        }
-        String cantTxt = this.textCantidad.getText().trim();
+        try {
+            int idProd = -1;
+            if (this.comboProducto.getItemCount() > 0) {
+                idProd = Integer.parseInt(this.comboProducto.getSelectedItem().toString().split(" - ")[0]);
+            }
+            String cantTxt = this.textCantidad.getText().trim();
 
-        if (idProd == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un producto registrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (cantTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar la cantidad", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (cantTxt.length() > 4) {
-            JOptionPane.showMessageDialog(this, "La cantidad puede tener máximo 4 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < cantTxt.length(); i++) {
-            if (!Character.isDigit(cantTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "La cantidad debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (idProd == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un producto registrado", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        int cant = Integer.parseInt(cantTxt);
-        if (cant <= 0) {
-            JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Producto p = OperacionesProducto.buscar(idProd);
-        if (p.getVencimiento().isBefore(LocalDate.now())) {
-            JOptionPane.showMessageDialog(this, "El producto está vencido, no se puede vender", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        int enResumen = 0;
-        for (int i = 0; i < this.carrito.size(); i++) {
-            ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
-            if (pv.getIdProducto() == idProd) {
-                enResumen = enResumen + (int) pv.getCantidad();
-            }
-        }
-        if (cant + enResumen > p.getExistencia()) {
-            JOptionPane.showMessageDialog(this, "No hay existencia suficiente. Quedan " + (p.getExistencia() - enResumen) + " unidades", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        boolean estaba = false;
-        for (int i = 0; i < this.carrito.size(); i++) {
-            ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
-            if (pv.getIdProducto() == idProd) {
-                pv.setCantidad(pv.getCantidad() + cant);
-                estaba = true;
-            }
-        }
-        if (!estaba) {
-            this.carrito.add(new ProductoVendido(0, idProd, 0, cant, p.getPrecioVenta()));
-        }
-
-        this.textCantidad.setText("");
-        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-        Estilo.ajustarColumnas(this.tablaProductos);
-        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-    }//GEN-LAST:event_btnAgregarActionPerformed
-
-    private void btnQuitarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitarActionPerformed
-        int fila = this.tablaProductos.getSelectedRow();
-        if (fila < 0) {
-            JOptionPane.showMessageDialog(this, "Elige un producto del resumen para quitarlo", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        this.carrito.remove(fila);
-        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-        Estilo.ajustarColumnas(this.tablaProductos);
-        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-    }//GEN-LAST:event_btnQuitarActionPerformed
-
-    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        String pago = (String) this.comboPago.getSelectedItem();
-        LocalDateTime fecha = this.fechaVenta.getValor();
-
-        if (idCli == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
-            JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (this.carrito.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Agrega al menos un producto a la venta", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String falta = Hotel.sinExistencia(this.carrito);
-        if (falta != null) {
-            JOptionPane.showMessageDialog(this, "No hay existencia suficiente de " + falta, "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        BigDecimal[] r = Hotel.totalesVenta(this.carrito);
-        long id = OperacionesVenta.nuevoId();
-        Venta v = new Venta(id, fecha, r[0], r[1], r[2], r[3], pago, idCli);
-        OperacionesVenta.Guardar(v);
-        Hotel.guardarProductos(id, this.carrito);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.idSel = 0;
-        this.comboPago.setSelectedIndex(0);
-        this.fechaVenta.setValor(LocalDateTime.now());
-        this.textCantidad.setText("");
-        this.carrito = new LinkedList();
-        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-        Estilo.ajustarColumnas(this.tablaProductos);
-        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-        this.tabla.setModel(OperacionesVenta.modeloVenta());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id de la Venta",
-                "Datos de la Venta",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (cantTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Debe ingresar la cantidad", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        Venta v2 = (Venta) OperacionesVenta.buscar(Long.parseLong(id.trim()));
-
-        if (v2 != null) {
-            this.idSel = v2.getIdVenta();
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(v2.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+            if (cantTxt.length() > 4) {
+                JOptionPane.showMessageDialog(this, "La cantidad puede tener máximo 4 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < cantTxt.length(); i++) {
+                if (!Character.isDigit(cantTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "La cantidad debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-            this.comboPago.setSelectedItem(v2.getTipoPago());
-            this.fechaVenta.setValor(v2.getFecha());
-            this.carrito = Hotel.productosDeVenta(v2.getIdVenta());
+            int cant = Integer.parseInt(cantTxt);
+            if (cant <= 0) {
+                JOptionPane.showMessageDialog(this, "La cantidad debe ser mayor a 0", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Producto p = OperacionesProducto.buscar(idProd);
+            if (p.getVencimiento().isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "El producto está vencido, no se puede vender", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int enResumen = 0;
+            for (int i = 0; i < this.carrito.size(); i++) {
+                ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
+                if (pv.getIdProducto() == idProd) {
+                    enResumen = enResumen + (int) pv.getCantidad();
+                }
+            }
+            int enCuenta = 0;
+            if (this.idCuentaSel != 0) {
+                enCuenta = (int) Hotel.cantidadEnCuenta(this.idCuentaSel, idProd);
+            }
+            if (cant + enResumen - enCuenta > p.getExistencia()) {
+                JOptionPane.showMessageDialog(this, "No hay existencia suficiente. Quedan " + (p.getExistencia() - enResumen + enCuenta) + " unidades", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean estaba = false;
+            for (int i = 0; i < this.carrito.size(); i++) {
+                ProductoVendido pv = (ProductoVendido) this.carrito.get(i);
+                if (pv.getIdProducto() == idProd) {
+                    pv.setCantidad(pv.getCantidad() + cant);
+                    estaba = true;
+                }
+            }
+            if (!estaba) {
+                this.carrito.add(new ProductoVendido(0, idProd, 0, cant, p.getPrecioVenta()));
+            }
+
+            this.textCantidad.setText("");
             this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
             Estilo.ajustarColumnas(this.tablaProductos);
             this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-            this.textTotal.setText(Tablas.dinero(v2.getTotal()));
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((long) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
-                }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnAgregarActionPerformed
+
+    private void btnQuitarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQuitarActionPerformed
+        try {
+            int fila = this.tablaProductos.getSelectedRow();
+            if (fila < 0) {
+                JOptionPane.showMessageDialog(this, "Elige un producto del resumen para quitarlo", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Venta no encontrada",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+
+            this.carrito.remove(fila);
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnQuitarActionPerformed
+
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        try {
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            String pago = (String) this.comboPago.getSelectedItem();
+            LocalDateTime fecha = this.fechaVenta.getValor();
+
+            if (idCli == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
+                JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Cuenta cu = OperacionesCuenta.buscarAbiertaDeCliente(idCli);
+            if (cu != null) {
+                if (this.idCuentaSel != cu.getIdCuenta()) {
+                    this.idCuentaSel = cu.getIdCuenta();
+                    this.jLabel1.setText("Ventas · Cuenta " + cu.getIdCuenta() + " abierta · Habitación " + OperacionesHabitacion.numero(cu.getIdHabitacion()));
+                    this.jLabel1.setForeground(Estilo.ACENTO);
+                    this.carrito = Hotel.consumosDeCuenta(cu.getIdCuenta());
+                    this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                    Estilo.ajustarColumnas(this.tablaProductos);
+                    this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                    JOptionPane.showMessageDialog(this, "El cliente tiene la cuenta " + cu.getIdCuenta() + " abierta. Se cargó su cuenta: edítala y vuelve a guardar", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                Hotel.reemplazarConsumos(cu.getIdCuenta(), this.carrito);
+                JOptionPane.showMessageDialog(this, "Se actualizó la cuenta " + cu.getIdCuenta() + ". Se cobra en el checkout", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+                this.carrito = Hotel.consumosDeCuenta(cu.getIdCuenta());
+                this.textCantidad.setText("");
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                return;
+            }
+            if (this.carrito.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Agrega al menos un producto a la venta", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            String falta = Hotel.sinExistencia(this.carrito);
+            if (falta != null) {
+                JOptionPane.showMessageDialog(this, "No hay existencia suficiente de " + falta, "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            BigDecimal[] r = Hotel.totalesVenta(this.carrito);
+            long id = OperacionesVenta.nuevoId();
+            Venta v = new Venta(id, fecha, r[0], r[1], r[2], r[3], pago, idCli);
+            OperacionesVenta.Guardar(v);
+            Hotel.guardarProductos(id, this.carrito);
+            Hotel.generarFactura(id);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
             this.idSel = 0;
             this.comboPago.setSelectedIndex(0);
             this.fechaVenta.setValor(LocalDateTime.now());
@@ -445,114 +461,212 @@ public class FormVenta extends javax.swing.JFrame {
             this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
             Estilo.ajustarColumnas(this.tablaProductos);
             this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            this.tabla.setModel(OperacionesVenta.modeloVenta());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id de la Venta",
+                    "Datos de la Venta",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Venta v2 = (Venta) OperacionesVenta.buscar(Long.parseLong(id.trim()));
+
+            if (v2 != null) {
+                this.idSel = v2.getIdVenta();
+                this.idCuentaSel = 0;
+                this.jLabel1.setText("Ventas");
+                this.jLabel1.setForeground(Estilo.TEXTO);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(v2.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
+                }
+                this.comboPago.setSelectedItem(v2.getTipoPago());
+                this.fechaVenta.setValor(v2.getFecha());
+                this.carrito = Hotel.productosDeVenta(v2.getIdVenta());
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                this.textTotal.setText(Tablas.dinero(v2.getTotal()));
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((long) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Venta no encontrada",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.comboPago.setSelectedIndex(0);
+                this.fechaVenta.setValor(LocalDateTime.now());
+                this.textCantidad.setText("");
+                this.carrito = new LinkedList();
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una venta de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        String pago = (String) this.comboPago.getSelectedItem();
-        LocalDateTime fecha = this.fechaVenta.getValor();
-
-        if (idCli == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
-            JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Venta actual = OperacionesVenta.buscar(this.idSel);
-        if (OperacionesVenta.modificar(this.idSel, fecha, actual.getTotal(), actual.getIva5(), actual.getIva19(), actual.getExento(), pago, idCli)) {
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la venta. Los productos de una venta guardada no cambian", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Venta no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
-        this.idSel = 0;
-        this.comboPago.setSelectedIndex(0);
-        this.fechaVenta.setValor(LocalDateTime.now());
-        this.textCantidad.setText("");
-        this.carrito = new LinkedList();
-        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-        Estilo.ajustarColumnas(this.tablaProductos);
-        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-        this.tabla.setModel(OperacionesVenta.modeloVenta());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnModificarActionPerformed
-
-    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una venta de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la venta " + this.idSel + "? Los productos vuelven al inventario", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
-
-        Hotel.devolverProductos(this.idSel);
-        if (OperacionesVenta.eliminar(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "Venta eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Venta no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-
-        this.idSel = 0;
-        this.comboPago.setSelectedIndex(0);
-        this.fechaVenta.setValor(LocalDateTime.now());
-        this.textCantidad.setText("");
-        this.carrito = new LinkedList();
-        this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-        Estilo.ajustarColumnas(this.tablaProductos);
-        this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-        this.tabla.setModel(OperacionesVenta.modeloVenta());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnEliminarActionPerformed
-
-    private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (long) this.tabla.getValueAt(fila, 0);
-            Venta v = OperacionesVenta.buscar(this.idSel);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(v.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
-                }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una venta de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-            this.comboPago.setSelectedItem(v.getTipoPago());
-            this.fechaVenta.setValor(v.getFecha());
-            this.carrito = Hotel.productosDeVenta(v.getIdVenta());
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            String pago = (String) this.comboPago.getSelectedItem();
+            LocalDateTime fecha = this.fechaVenta.getValor();
+
+            if (idCli == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente registrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (fecha.isAfter(LocalDateTime.now().plusMinutes(1))) {
+                JOptionPane.showMessageDialog(this, "La fecha de la venta no puede ser futura", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Venta actual = OperacionesVenta.buscar(this.idSel);
+            if (OperacionesVenta.modificar(this.idSel, fecha, actual.getTotal(), actual.getIva5(), actual.getIva19(), actual.getExento(), pago, idCli)) {
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la venta. Los productos de una venta guardada no cambian", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Venta no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            this.idSel = 0;
+            this.comboPago.setSelectedIndex(0);
+            this.fechaVenta.setValor(LocalDateTime.now());
+            this.textCantidad.setText("");
+            this.carrito = new LinkedList();
             this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
             Estilo.ajustarColumnas(this.tablaProductos);
             this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-            this.textTotal.setText(Tablas.dinero(v.getTotal()));
+            this.tabla.setModel(OperacionesVenta.modeloVenta());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una venta de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la venta " + this.idSel + "? Los productos vuelven al inventario", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            Hotel.devolverProductos(this.idSel);
+            if (OperacionesVenta.eliminar(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "Venta eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Venta no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+            this.idSel = 0;
+            this.comboPago.setSelectedIndex(0);
+            this.fechaVenta.setValor(LocalDateTime.now());
+            this.textCantidad.setText("");
+            this.carrito = new LinkedList();
+            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+            Estilo.ajustarColumnas(this.tablaProductos);
+            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+            this.tabla.setModel(OperacionesVenta.modeloVenta());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (long) this.tabla.getValueAt(fila, 0);
+                this.idCuentaSel = 0;
+                this.jLabel1.setText("Ventas");
+                this.jLabel1.setForeground(Estilo.TEXTO);
+                Venta v = OperacionesVenta.buscar(this.idSel);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(v.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
+                }
+                this.comboPago.setSelectedItem(v.getTipoPago());
+                this.fechaVenta.setValor(v.getFecha());
+                this.carrito = Hotel.productosDeVenta(v.getIdVenta());
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                this.textTotal.setText(Tablas.dinero(v.getTotal()));
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (long) this.tabla.getValueAt(fila, 0);
-            Venta v = OperacionesVenta.buscar(this.idSel);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(v.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (long) this.tabla.getValueAt(fila, 0);
+                this.idCuentaSel = 0;
+                this.jLabel1.setText("Ventas");
+                this.jLabel1.setForeground(Estilo.TEXTO);
+                Venta v = OperacionesVenta.buscar(this.idSel);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(v.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
                 }
+                this.comboPago.setSelectedItem(v.getTipoPago());
+                this.fechaVenta.setValor(v.getFecha());
+                this.carrito = Hotel.productosDeVenta(v.getIdVenta());
+                this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
+                Estilo.ajustarColumnas(this.tablaProductos);
+                this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
+                this.textTotal.setText(Tablas.dinero(v.getTotal()));
             }
-            this.comboPago.setSelectedItem(v.getTipoPago());
-            this.fechaVenta.setValor(v.getFecha());
-            this.carrito = Hotel.productosDeVenta(v.getIdVenta());
-            this.tablaProductos.setModel(OperacionesProductoVendido.modeloResumen(this.carrito));
-            Estilo.ajustarColumnas(this.tablaProductos);
-            this.textTotal.setText(Tablas.dinero(Hotel.totalesVenta(this.carrito)[0]));
-            this.textTotal.setText(Tablas.dinero(v.getTotal()));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

@@ -10,22 +10,26 @@ public class FormCliente extends javax.swing.JFrame {
     private int idSel = 0;
 
     public FormCliente() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesCliente.modeloCliente());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesCliente.modeloCliente());
+            Estilo.tabla(tabla);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -205,113 +209,53 @@ public class FormCliente extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        String nom = this.textNombre.getText().trim();
-        String ape = this.textApellido.getText().trim();
-        String docTxt = this.textDocumento.getText().trim();
-        String cor = this.textCorreo.getText().trim();
-        String tel = this.textTelefono.getText().trim();
-        String dir = this.textDireccion.getText().trim();
-        String sexo = (String) this.textSexo.getSelectedItem();
+        try {
+            String nom = this.textNombre.getText().trim();
+            String ape = this.textApellido.getText().trim();
+            String docTxt = this.textDocumento.getText().trim();
+            String cor = this.textCorreo.getText().trim();
+            String tel = this.textTelefono.getText().trim();
+            String dir = this.textDireccion.getText().trim();
+            String sexo = (String) this.textSexo.getSelectedItem();
 
-        if (nom.isEmpty() || ape.isEmpty() || docTxt.isEmpty() || cor.isEmpty() || tel.isEmpty() || dir.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (docTxt.length() < 5 || docTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El documento debe tener entre 5 y 9 números", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < docTxt.length(); i++) {
-            if (!Character.isDigit(docTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El documento solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+            if (nom.isEmpty() || ape.isEmpty() || docTxt.isEmpty() || cor.isEmpty() || tel.isEmpty() || dir.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (tel.length() < 7 || tel.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El teléfono debe tener entre 7 y 10 números", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < tel.length(); i++) {
-            if (!Character.isDigit(tel.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El teléfono solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+            if (docTxt.length() < 5 || docTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El documento debe tener entre 5 y 9 números", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (!cor.contains("@") || !cor.contains(".")) {
-            JOptionPane.showMessageDialog(this, "El correo no es válido", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int doc = Integer.parseInt(docTxt);
-        if (OperacionesCliente.buscarPorDocumento(doc) != null) {
-            JOptionPane.showMessageDialog(this, "Ya existe un cliente con ese documento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Cliente c = new Cliente(OperacionesCliente.nuevoId(), nom, ape, doc, cor, tel, dir, sexo);
-        OperacionesCliente.Guardar(c);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.idSel = 0;
-        this.textNombre.setText("");
-        this.textApellido.setText("");
-        this.textDocumento.setText("");
-        this.textCorreo.setText("");
-        this.textTelefono.setText("");
-        this.textDireccion.setText("");
-        this.textSexo.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesCliente.modeloCliente());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id del Cliente",
-                "Datos del Cliente",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        Cliente c2 = (Cliente) OperacionesCliente.buscar(Integer.parseInt(id.trim()));
-
-        if (c2 != null) {
-            this.idSel = c2.getId();
-            this.textNombre.setText(c2.getNombre());
-            this.textApellido.setText(c2.getApellido());
-            this.textDocumento.setText("" + c2.getDocumento());
-            this.textCorreo.setText(c2.getCorreo());
-            this.textTelefono.setText(c2.getTelefono());
-            this.textDireccion.setText(c2.getDireccion());
-            this.textSexo.setSelectedItem(c2.getSexo());
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
+            for (int i = 0; i < docTxt.length(); i++) {
+                if (!Character.isDigit(docTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El documento solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Cliente no encontrado",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            if (tel.length() < 7 || tel.length() > 10) {
+                JOptionPane.showMessageDialog(this, "El teléfono debe tener entre 7 y 10 números", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < tel.length(); i++) {
+                if (!Character.isDigit(tel.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El teléfono solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (!cor.contains("@") || !cor.contains(".")) {
+                JOptionPane.showMessageDialog(this, "El correo no es válido", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int doc = Integer.parseInt(docTxt);
+            if (OperacionesCliente.buscarPorDocumento(doc) != null) {
+                JOptionPane.showMessageDialog(this, "Ya existe un cliente con ese documento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Cliente c = new Cliente(OperacionesCliente.nuevoId(), nom, ape, doc, cor, tel, dir, sexo);
+            OperacionesCliente.Guardar(c);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
             this.idSel = 0;
             this.textNombre.setText("");
             this.textApellido.setText("");
@@ -320,134 +264,218 @@ public class FormCliente extends javax.swing.JFrame {
             this.textTelefono.setText("");
             this.textDireccion.setText("");
             this.textSexo.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesCliente.modeloCliente());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id del Cliente",
+                    "Datos del Cliente",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Cliente c2 = (Cliente) OperacionesCliente.buscar(Integer.parseInt(id.trim()));
+
+            if (c2 != null) {
+                this.idSel = c2.getId();
+                this.textNombre.setText(c2.getNombre());
+                this.textApellido.setText(c2.getApellido());
+                this.textDocumento.setText("" + c2.getDocumento());
+                this.textCorreo.setText(c2.getCorreo());
+                this.textTelefono.setText(c2.getTelefono());
+                this.textDireccion.setText(c2.getDireccion());
+                this.textSexo.setSelectedItem(c2.getSexo());
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Cliente no encontrado",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.textNombre.setText("");
+                this.textApellido.setText("");
+                this.textDocumento.setText("");
+                this.textCorreo.setText("");
+                this.textTelefono.setText("");
+                this.textDireccion.setText("");
+                this.textSexo.setSelectedIndex(0);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un cliente de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String nom = this.textNombre.getText().trim();
-        String ape = this.textApellido.getText().trim();
-        String docTxt = this.textDocumento.getText().trim();
-        String cor = this.textCorreo.getText().trim();
-        String tel = this.textTelefono.getText().trim();
-        String dir = this.textDireccion.getText().trim();
-        String sexo = (String) this.textSexo.getSelectedItem();
-
-        if (nom.isEmpty() || ape.isEmpty() || docTxt.isEmpty() || cor.isEmpty() || tel.isEmpty() || dir.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (docTxt.length() < 5 || docTxt.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El documento debe tener entre 5 y 9 números", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < docTxt.length(); i++) {
-            if (!Character.isDigit(docTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El documento solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un cliente de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (tel.length() < 7 || tel.length() > 10) {
-            JOptionPane.showMessageDialog(this, "El teléfono debe tener entre 7 y 10 números", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < tel.length(); i++) {
-            if (!Character.isDigit(tel.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El teléfono solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+            String nom = this.textNombre.getText().trim();
+            String ape = this.textApellido.getText().trim();
+            String docTxt = this.textDocumento.getText().trim();
+            String cor = this.textCorreo.getText().trim();
+            String tel = this.textTelefono.getText().trim();
+            String dir = this.textDireccion.getText().trim();
+            String sexo = (String) this.textSexo.getSelectedItem();
+
+            if (nom.isEmpty() || ape.isEmpty() || docTxt.isEmpty() || cor.isEmpty() || tel.isEmpty() || dir.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (!cor.contains("@") || !cor.contains(".")) {
-            JOptionPane.showMessageDialog(this, "El correo no es válido", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int doc = Integer.parseInt(docTxt);
-        Cliente otro = OperacionesCliente.buscarPorDocumento(doc);
-        if (otro != null && otro.getId() != this.idSel) {
-            JOptionPane.showMessageDialog(this, "Ya existe otro cliente con ese documento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (docTxt.length() < 5 || docTxt.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El documento debe tener entre 5 y 9 números", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < docTxt.length(); i++) {
+                if (!Character.isDigit(docTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El documento solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (tel.length() < 7 || tel.length() > 10) {
+                JOptionPane.showMessageDialog(this, "El teléfono debe tener entre 7 y 10 números", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < tel.length(); i++) {
+                if (!Character.isDigit(tel.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El teléfono solo puede tener números", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (!cor.contains("@") || !cor.contains(".")) {
+                JOptionPane.showMessageDialog(this, "El correo no es válido", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int doc = Integer.parseInt(docTxt);
+            Cliente otro = OperacionesCliente.buscarPorDocumento(doc);
+            if (otro != null && otro.getId() != this.idSel) {
+                JOptionPane.showMessageDialog(this, "Ya existe otro cliente con ese documento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (OperacionesCliente.modificar(this.idSel, nom, ape, doc, cor, tel, dir, sexo)) {
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el cliente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Cliente no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesCliente.modificar(this.idSel, nom, ape, doc, cor, tel, dir, sexo)) {
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el cliente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Cliente no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textNombre.setText("");
-        this.textApellido.setText("");
-        this.textDocumento.setText("");
-        this.textCorreo.setText("");
-        this.textTelefono.setText("");
-        this.textDireccion.setText("");
-        this.textSexo.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesCliente.modeloCliente());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textNombre.setText("");
+            this.textApellido.setText("");
+            this.textDocumento.setText("");
+            this.textCorreo.setText("");
+            this.textTelefono.setText("");
+            this.textDireccion.setText("");
+            this.textSexo.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesCliente.modeloCliente());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un cliente de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (Hotel.clienteTieneRegistros(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "No se puede eliminar: el cliente tiene reservas activas, check-in o ventas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar a " + OperacionesCliente.nombreCompleto(this.idSel) + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un cliente de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.clienteTieneRegistros(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "No se puede eliminar: el cliente tiene reservas activas, check-in o ventas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar a " + OperacionesCliente.nombreCompleto(this.idSel) + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        if (OperacionesCliente.eliminar(this.idSel)) {
-            JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Cliente no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (OperacionesCliente.eliminar(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Cliente no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.textNombre.setText("");
-        this.textApellido.setText("");
-        this.textDocumento.setText("");
-        this.textCorreo.setText("");
-        this.textTelefono.setText("");
-        this.textDireccion.setText("");
-        this.textSexo.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesCliente.modeloCliente());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.textNombre.setText("");
+            this.textApellido.setText("");
+            this.textDocumento.setText("");
+            this.textCorreo.setText("");
+            this.textTelefono.setText("");
+            this.textDireccion.setText("");
+            this.textSexo.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesCliente.modeloCliente());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Cliente c = OperacionesCliente.buscar(this.idSel);
-            this.textNombre.setText(c.getNombre());
-            this.textApellido.setText(c.getApellido());
-            this.textDocumento.setText("" + c.getDocumento());
-            this.textCorreo.setText(c.getCorreo());
-            this.textTelefono.setText(c.getTelefono());
-            this.textDireccion.setText(c.getDireccion());
-            this.textSexo.setSelectedItem(c.getSexo());
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Cliente c = OperacionesCliente.buscar(this.idSel);
+                this.textNombre.setText(c.getNombre());
+                this.textApellido.setText(c.getApellido());
+                this.textDocumento.setText("" + c.getDocumento());
+                this.textCorreo.setText(c.getCorreo());
+                this.textTelefono.setText(c.getTelefono());
+                this.textDireccion.setText(c.getDireccion());
+                this.textSexo.setSelectedItem(c.getSexo());
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Cliente c = OperacionesCliente.buscar(this.idSel);
-            this.textNombre.setText(c.getNombre());
-            this.textApellido.setText(c.getApellido());
-            this.textDocumento.setText("" + c.getDocumento());
-            this.textCorreo.setText(c.getCorreo());
-            this.textTelefono.setText(c.getTelefono());
-            this.textDireccion.setText(c.getDireccion());
-            this.textSexo.setSelectedItem(c.getSexo());
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Cliente c = OperacionesCliente.buscar(this.idSel);
+                this.textNombre.setText(c.getNombre());
+                this.textApellido.setText(c.getApellido());
+                this.textDocumento.setText("" + c.getDocumento());
+                this.textCorreo.setText(c.getCorreo());
+                this.textTelefono.setText(c.getTelefono());
+                this.textDireccion.setText(c.getDireccion());
+                this.textSexo.setSelectedItem(c.getSexo());
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

@@ -14,6 +14,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.LinkedList;
 
 public class ConexionBD {
     Connection ConexionBD;
@@ -72,6 +74,56 @@ public class ConexionBD {
 							InstantiationException,
 							IllegalAccessException{
 		conectar("org.postgresql.Driver","postgresql",true);
+	}
+
+	public static final String IP = "localhost";
+	public static final String PUERTO = "3306";
+	public static final String BD = "hotel";
+	public static final String USUARIO = "root";
+	public static final String PASSWORD = "";
+
+	public static ConexionBD abrir() throws Exception {
+		try {
+			ConexionBD con = new ConexionBD(IP, PUERTO, BD, USUARIO, PASSWORD);
+			con.ConexionBDMySQL();
+			return con;
+		} catch (Exception e) {
+			throw new Exception("No se pudo conectar con la base de datos " + BD + ". Revisa que MySQL esté encendido");
+		}
+	}
+
+	public static void cerrar(ConexionBD con){
+		try {
+			if (con != null) {
+				con.cerrar();
+			}
+		} catch (Exception e) {
+		}
+	}
+
+	public static LinkedList<Object[]> filas(String sql) throws Exception {
+		ConexionBD con = null;
+		try {
+			con = abrir();
+			ResultSet rs = con.consultar(sql);
+			int columnas = rs.getMetaData().getColumnCount();
+			LinkedList<Object[]> lista = new LinkedList();
+			while (rs.next()) {
+				Object[] fila = new Object[columnas];
+				for (int i = 0; i < columnas; i++) {
+					Object valor = rs.getObject(i + 1);
+					if (valor instanceof Timestamp) {
+						valor = ((Timestamp) valor).toLocalDateTime();
+					}
+					fila[i] = valor;
+				}
+				lista.add(fila);
+			}
+			rs.close();
+			return lista;
+		} finally {
+			cerrar(con);
+		}
 	}
 
 	// Devuelve la conexión abierta para poder usar PreparedStatement

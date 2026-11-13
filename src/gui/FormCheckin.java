@@ -8,6 +8,7 @@ import mundo.Habitacion;
 import mundo.Hotel;
 import mundo.OperacionesCheckin;
 import mundo.OperacionesCliente;
+import mundo.OperacionesCuenta;
 import mundo.OperacionesHabitacion;
 import mundo.OperacionesReserva;
 import mundo.Reserva;
@@ -17,45 +18,49 @@ public class FormCheckin extends javax.swing.JFrame {
     private int idSel = 0;
 
     public FormCheckin() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        fechaIngreso.setValor(LocalDateTime.now());
-        fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
-        textNoches.setBackground(new java.awt.Color(0xEFEFEA));
-        textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor()));
-        fechaIngreso.alCambiar(() -> textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor())));
-        fechaSalida.alCambiar(() -> textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor())));
-        this.comboReserva.removeAllItems();
-        this.comboReserva.addItem("Sin reserva");
-        for (Reserva x : OperacionesReserva.lr) {
-            if (x.getEstado().equals("Activa")) {
-                this.comboReserva.addItem(x.getIdReserva() + " - " + OperacionesCliente.nombreCompleto(x.getIdCliente())
-                        + " (hab. " + OperacionesHabitacion.numero(x.getIdHabitacion()) + ")");
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            fechaIngreso.setValor(LocalDateTime.now());
+            fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
+            textNoches.setBackground(new java.awt.Color(0xEFEFEA));
+            textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor()));
+            fechaIngreso.alCambiar(() -> textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor())));
+            fechaSalida.alCambiar(() -> textNoches.setText("" + Hotel.noches(fechaIngreso.getValor(), fechaSalida.getValor())));
+            this.comboReserva.removeAllItems();
+            this.comboReserva.addItem("Sin reserva");
+            for (Reserva x : OperacionesReserva.listar()) {
+                if (Hotel.vigente(x.getEstado())) {
+                    this.comboReserva.addItem(x.getIdReserva() + " - " + OperacionesCliente.nombreCompleto(x.getIdCliente())
+                            + " (hab. " + OperacionesHabitacion.numero(x.getIdHabitacion()) + ")");
+                }
             }
-        }
-        this.comboCliente.removeAllItems();
-        for (Cliente x : OperacionesCliente.lc) {
-            this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
-        }
-        this.comboHabitacion.removeAllItems();
-        for (Habitacion x : OperacionesHabitacion.lh) {
-            this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
-        }
+            this.comboCliente.removeAllItems();
+            for (Cliente x : OperacionesCliente.listar()) {
+                this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
+            }
+            this.comboHabitacion.removeAllItems();
+            for (Habitacion x : OperacionesHabitacion.listar()) {
+                this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
+            }
 
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesCheckin.modeloCheckin());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesCheckin.modeloCheckin());
+            Estilo.tabla(tabla);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -273,186 +278,124 @@ public class FormCheckin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void comboReservaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboReservaActionPerformed
-        int idReserva = -1;
-        if (this.comboReserva.getSelectedIndex() > 0) {
-            idReserva = Integer.parseInt(this.comboReserva.getSelectedItem().toString().split(" - ")[0]);
-        }
-        if (idReserva == -1) {
-            return;
-        }
-        Reserva r = OperacionesReserva.buscar(idReserva);
-        for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-            if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
-                this.comboCliente.setSelectedIndex(i);
+        try {
+            int idReserva = -1;
+            if (this.comboReserva.getSelectedIndex() > 0) {
+                idReserva = Integer.parseInt(this.comboReserva.getSelectedItem().toString().split(" - ")[0]);
             }
-        }
-        for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-            if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
-                this.comboHabitacion.setSelectedIndex(i);
-            }
-        }
-        this.fechaIngreso.setValor(r.getFechaEntrada());
-        this.fechaSalida.setValor(r.getFechaSalida());
-        this.textNoches.setText("" + Hotel.noches(r.getFechaEntrada(), r.getFechaSalida()));
-    }//GEN-LAST:event_comboReservaActionPerformed
-
-    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        int idRes = -1;
-        if (this.comboReserva.getSelectedIndex() > 0) {
-            idRes = Integer.parseInt(this.comboReserva.getSelectedItem().toString().split(" - ")[0]);
-        }
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        int idHab = -1;
-        if (this.comboHabitacion.getItemCount() > 0) {
-            idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
-        }
-        LocalDateTime ing = this.fechaIngreso.getValor();
-        LocalDateTime sal = this.fechaSalida.getValor();
-        String trans = (String) this.comboTransporte.getSelectedItem();
-        String mot = (String) this.comboMotivo.getSelectedItem();
-        String proc = this.textProcedencia.getText().trim();
-        String acompTxt = this.textAcompanantes.getText().trim();
-
-        if (idCli == -1 || idHab == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (proc.isEmpty() || acompTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (acompTxt.length() > 2) {
-            JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < acompTxt.length(); i++) {
-            if (!Character.isDigit(acompTxt.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+            if (idReserva == -1) {
                 return;
             }
-        }
-        if (!sal.isAfter(ing)) {
-            JOptionPane.showMessageDialog(this, "La salida debe ser después del ingreso", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int acomp = Integer.parseInt(acompTxt);
-        Habitacion h = OperacionesHabitacion.buscar(idHab);
-        if (h.getEstado().equals("Mantenimiento")) {
-            JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (acomp + 1 > h.getCapacidad()) {
-            JOptionPane.showMessageDialog(this, "La habitación solo tiene capacidad para " + h.getCapacidad() + " persona(s)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (!Hotel.habitacionLibre(idHab, ing, sal, idRes, 0)) {
-            JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Checkin c = new Checkin(OperacionesCheckin.nuevoId(), ing, sal, Hotel.noches(ing, sal), idHab, idCli, trans, mot, proc, acomp);
-        OperacionesCheckin.Guardar(c);
-
-        if (idRes != -1) {
-            Reserva r = OperacionesReserva.buscar(idRes);
-            OperacionesReserva.modificar(r.getIdReserva(), r.getIdCliente(), r.getIdHabitacion(), r.getFechaEntrada(), r.getFechaSalida(), r.getCreatedAt(), r.getTipoReserva(), "Completada");
-            Hotel.actualizarHabitacion(r.getIdHabitacion());
-        }
-        Hotel.actualizarHabitacion(idHab);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.comboReserva.removeAllItems();
-        this.comboReserva.addItem("Sin reserva");
-        for (Reserva x : OperacionesReserva.lr) {
-            if (x.getEstado().equals("Activa")) {
-                this.comboReserva.addItem(x.getIdReserva() + " - " + OperacionesCliente.nombreCompleto(x.getIdCliente())
-                        + " (hab. " + OperacionesHabitacion.numero(x.getIdHabitacion()) + ")");
-            }
-        }
-        this.comboCliente.removeAllItems();
-        for (Cliente x : OperacionesCliente.lc) {
-            this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
-        }
-        this.comboHabitacion.removeAllItems();
-        for (Habitacion x : OperacionesHabitacion.lh) {
-            this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
-        }
-
-        this.idSel = 0;
-        this.comboReserva.setSelectedIndex(0);
-        this.fechaIngreso.setValor(LocalDateTime.now());
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
-        this.comboTransporte.setSelectedIndex(0);
-        this.comboMotivo.setSelectedIndex(0);
-        this.textProcedencia.setText("");
-        this.textAcompanantes.setText("0");
-        this.tabla.setModel(OperacionesCheckin.modeloCheckin());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id del Checkin",
-                "Datos del Checkin",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        Checkin c2 = (Checkin) OperacionesCheckin.buscar(Integer.parseInt(id.trim()));
-
-        if (c2 != null) {
-            this.idSel = c2.getIdCheckin();
-            this.comboReserva.setSelectedIndex(0);
+            Reserva r = OperacionesReserva.buscar(idReserva);
             for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(c2.getIdCliente() + " - ")) {
+                if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
                     this.comboCliente.setSelectedIndex(i);
                 }
             }
             for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(c2.getIdHabitacion() + " - ")) {
+                if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
                     this.comboHabitacion.setSelectedIndex(i);
                 }
             }
-            this.fechaIngreso.setValor(c2.getFechaIngreso());
-            this.fechaSalida.setValor(c2.getFechaSalida());
-            this.textNoches.setText("" + c2.getNoches());
-            this.comboTransporte.setSelectedItem(c2.getTransporte());
-            this.comboMotivo.setSelectedItem(c2.getMotivoViaje());
-            this.textProcedencia.setText(c2.getProcedencia());
-            this.textAcompanantes.setText("" + c2.getAcompañantes());
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
+            this.fechaIngreso.setValor(r.getFechaEntrada());
+            this.fechaSalida.setValor(r.getFechaSalida());
+            this.textNoches.setText("" + Hotel.noches(r.getFechaEntrada(), r.getFechaSalida()));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_comboReservaActionPerformed
+
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        try {
+            int idRes = -1;
+            if (this.comboReserva.getSelectedIndex() > 0) {
+                idRes = Integer.parseInt(this.comboReserva.getSelectedItem().toString().split(" - ")[0]);
+            }
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            int idHab = -1;
+            if (this.comboHabitacion.getItemCount() > 0) {
+                idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
+            }
+            LocalDateTime ing = this.fechaIngreso.getValor();
+            LocalDateTime sal = this.fechaSalida.getValor();
+            String trans = (String) this.comboTransporte.getSelectedItem();
+            String mot = (String) this.comboMotivo.getSelectedItem();
+            String proc = this.textProcedencia.getText().trim();
+            String acompTxt = this.textAcompanantes.getText().trim();
+
+            if (idCli == -1 || idHab == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (proc.isEmpty() || acompTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (acompTxt.length() > 2) {
+                JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < acompTxt.length(); i++) {
+                if (!Character.isDigit(acompTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Checkin no encontrado",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            if (!sal.isAfter(ing)) {
+                JOptionPane.showMessageDialog(this, "La salida debe ser después del ingreso", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int acomp = Integer.parseInt(acompTxt);
+            Habitacion h = OperacionesHabitacion.buscar(idHab);
+            if (h.getEstado().equals("Mantenimiento")) {
+                JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (acomp + 1 > h.getCapacidad()) {
+                JOptionPane.showMessageDialog(this, "La habitación solo tiene capacidad para " + h.getCapacidad() + " persona(s)", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!Hotel.habitacionLibre(idHab, ing, sal, idRes, 0)) {
+                JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (OperacionesCuenta.tieneAbierta(idCli)) {
+                JOptionPane.showMessageDialog(this, "El cliente ya tiene un check-in con cuenta abierta", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Checkin c = new Checkin(OperacionesCheckin.nuevoId(), ing, sal, Hotel.noches(ing, sal), idHab, idCli, trans, mot, proc, acomp);
+            OperacionesCheckin.Guardar(c);
+            Hotel.abrirCuenta(c);
+
+            if (idRes != -1) {
+                Reserva r = OperacionesReserva.buscar(idRes);
+                OperacionesReserva.modificar(r.getIdReserva(), r.getIdCliente(), r.getIdHabitacion(), r.getFechaEntrada(), r.getFechaSalida(), r.getCreatedAt(), r.getTipoReserva(), "FINALIZADA");
+                Hotel.actualizarHabitacion(r.getIdHabitacion());
+            }
+            Hotel.actualizarHabitacion(idHab);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+            this.comboReserva.removeAllItems();
+            this.comboReserva.addItem("Sin reserva");
+            for (Reserva x : OperacionesReserva.listar()) {
+                if (Hotel.vigente(x.getEstado())) {
+                    this.comboReserva.addItem(x.getIdReserva() + " - " + OperacionesCliente.nombreCompleto(x.getIdCliente())
+                            + " (hab. " + OperacionesHabitacion.numero(x.getIdHabitacion()) + ")");
+                }
+            }
+            this.comboCliente.removeAllItems();
+            for (Cliente x : OperacionesCliente.listar()) {
+                this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
+            }
+            this.comboHabitacion.removeAllItems();
+            for (Habitacion x : OperacionesHabitacion.listar()) {
+                this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
+            }
+
             this.idSel = 0;
             this.comboReserva.setSelectedIndex(0);
             this.fechaIngreso.setValor(LocalDateTime.now());
@@ -461,176 +404,281 @@ public class FormCheckin extends javax.swing.JFrame {
             this.comboMotivo.setSelectedIndex(0);
             this.textProcedencia.setText("");
             this.textAcompanantes.setText("0");
+            this.tabla.setModel(OperacionesCheckin.modeloCheckin());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id del Checkin",
+                    "Datos del Checkin",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Checkin c2 = (Checkin) OperacionesCheckin.buscar(Integer.parseInt(id.trim()));
+
+            if (c2 != null) {
+                this.idSel = c2.getIdCheckin();
+                this.comboReserva.setSelectedIndex(0);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(c2.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
+                }
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(c2.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
+                }
+                this.fechaIngreso.setValor(c2.getFechaIngreso());
+                this.fechaSalida.setValor(c2.getFechaSalida());
+                this.textNoches.setText("" + c2.getNoches());
+                this.comboTransporte.setSelectedItem(c2.getTransporte());
+                this.comboMotivo.setSelectedItem(c2.getMotivoViaje());
+                this.textProcedencia.setText(c2.getProcedencia());
+                this.textAcompanantes.setText("" + c2.getAcompañantes());
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Checkin no encontrado",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.comboReserva.setSelectedIndex(0);
+                this.fechaIngreso.setValor(LocalDateTime.now());
+                this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
+                this.comboTransporte.setSelectedIndex(0);
+                this.comboMotivo.setSelectedIndex(0);
+                this.textProcedencia.setText("");
+                this.textAcompanantes.setText("0");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un check-in de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Checkin actual = OperacionesCheckin.buscar(this.idSel);
-        if (actual == null) {
-            JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        int idHab = -1;
-        if (this.comboHabitacion.getItemCount() > 0) {
-            idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
-        }
-        LocalDateTime ing = this.fechaIngreso.getValor();
-        LocalDateTime sal = this.fechaSalida.getValor();
-        String trans = (String) this.comboTransporte.getSelectedItem();
-        String mot = (String) this.comboMotivo.getSelectedItem();
-        String proc = this.textProcedencia.getText().trim();
-        String acompTxt = this.textAcompanantes.getText().trim();
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un check-in de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Checkin actual = OperacionesCheckin.buscar(this.idSel);
+            if (actual == null) {
+                JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            int idHab = -1;
+            if (this.comboHabitacion.getItemCount() > 0) {
+                idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
+            }
+            LocalDateTime ing = this.fechaIngreso.getValor();
+            LocalDateTime sal = this.fechaSalida.getValor();
+            String trans = (String) this.comboTransporte.getSelectedItem();
+            String mot = (String) this.comboMotivo.getSelectedItem();
+            String proc = this.textProcedencia.getText().trim();
+            String acompTxt = this.textAcompanantes.getText().trim();
 
-        if (idCli == -1 || idHab == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (proc.isEmpty() || acompTxt.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (acompTxt.length() > 2) {
-            JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < acompTxt.length(); i++) {
-            if (!Character.isDigit(acompTxt.charAt(i))) {
+            if (idCli == -1 || idHab == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (proc.isEmpty() || acompTxt.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (acompTxt.length() > 2) {
                 JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        if (!sal.isAfter(ing)) {
-            JOptionPane.showMessageDialog(this, "La salida debe ser después del ingreso", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int acomp = Integer.parseInt(acompTxt);
-        Habitacion h = OperacionesHabitacion.buscar(idHab);
-        if (h.getEstado().equals("Mantenimiento")) {
-            JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (acomp + 1 > h.getCapacidad()) {
-            JOptionPane.showMessageDialog(this, "La habitación solo tiene capacidad para " + h.getCapacidad() + " persona(s)", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (!Hotel.habitacionLibre(idHab, ing, sal, 0, this.idSel)) {
-            JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            for (int i = 0; i < acompTxt.length(); i++) {
+                if (!Character.isDigit(acompTxt.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "Los acompañantes deben ser un número (máximo 2 dígitos)", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            if (!sal.isAfter(ing)) {
+                JOptionPane.showMessageDialog(this, "La salida debe ser después del ingreso", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int acomp = Integer.parseInt(acompTxt);
+            Habitacion h = OperacionesHabitacion.buscar(idHab);
+            if (h.getEstado().equals("Mantenimiento")) {
+                JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (acomp + 1 > h.getCapacidad()) {
+                JOptionPane.showMessageDialog(this, "La habitación solo tiene capacidad para " + h.getCapacidad() + " persona(s)", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!Hotel.habitacionLibre(idHab, ing, sal, 0, this.idSel)) {
+                JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        int habAnterior = actual.getIdHabitacion();
-        if (OperacionesCheckin.modificar(this.idSel, ing, sal, Hotel.noches(ing, sal), idHab, idCli, trans, mot, proc, acomp)) {
-            Hotel.actualizarHabitacion(habAnterior);
-            Hotel.actualizarHabitacion(idHab);
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el checkin", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            if (idCli != actual.getIdCliente() && OperacionesCuenta.tieneAbierta(idCli)) {
+                JOptionPane.showMessageDialog(this, "El cliente ya tiene un check-in con cuenta abierta", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int habAnterior = actual.getIdHabitacion();
+            if (OperacionesCheckin.modificar(this.idSel, ing, sal, Hotel.noches(ing, sal), idHab, idCli, trans, mot, proc, acomp)) {
+                OperacionesCuenta.actualizarDeCheckin(this.idSel, idCli, idHab);
+                Hotel.actualizarHabitacion(habAnterior);
+                Hotel.actualizarHabitacion(idHab);
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente el checkin", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.comboReserva.setSelectedIndex(0);
-        this.fechaIngreso.setValor(LocalDateTime.now());
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
-        this.comboTransporte.setSelectedIndex(0);
-        this.comboMotivo.setSelectedIndex(0);
-        this.textProcedencia.setText("");
-        this.textAcompanantes.setText("0");
-        this.tabla.setModel(OperacionesCheckin.modeloCheckin());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.comboReserva.setSelectedIndex(0);
+            this.fechaIngreso.setValor(LocalDateTime.now());
+            this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
+            this.comboTransporte.setSelectedIndex(0);
+            this.comboMotivo.setSelectedIndex(0);
+            this.textProcedencia.setText("");
+            this.textAcompanantes.setText("0");
+            this.tabla.setModel(OperacionesCheckin.modeloCheckin());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige un check-in de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Checkin actual = OperacionesCheckin.buscar(this.idSel);
-        if (actual == null) {
-            JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar el check-in " + this.idSel + "? La habitación quedará libre.", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige un check-in de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Checkin actual = OperacionesCheckin.buscar(this.idSel);
+            if (actual == null) {
+                JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.cuentaTieneConsumos(this.idSel)) {
+                JOptionPane.showMessageDialog(this, "No se puede eliminar: la cuenta del check-in tiene consumos. Haz el checkout en Cuentas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar el check-in " + this.idSel + "? La habitación quedará libre.", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        int idHab = actual.getIdHabitacion();
-        if (OperacionesCheckin.eliminar(this.idSel)) {
-            Hotel.actualizarHabitacion(idHab);
-            JOptionPane.showMessageDialog(this, "Checkin eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            int idHab = actual.getIdHabitacion();
+            OperacionesCuenta.eliminarDeCheckin(this.idSel);
+            if (OperacionesCheckin.eliminar(this.idSel)) {
+                Hotel.actualizarHabitacion(idHab);
+                JOptionPane.showMessageDialog(this, "Checkin eliminado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Checkin no encontrado", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.comboReserva.setSelectedIndex(0);
-        this.fechaIngreso.setValor(LocalDateTime.now());
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
-        this.comboTransporte.setSelectedIndex(0);
-        this.comboMotivo.setSelectedIndex(0);
-        this.textProcedencia.setText("");
-        this.textAcompanantes.setText("0");
-        this.tabla.setModel(OperacionesCheckin.modeloCheckin());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.comboReserva.setSelectedIndex(0);
+            this.fechaIngreso.setValor(LocalDateTime.now());
+            this.fechaSalida.setValor(LocalDateTime.now().plusDays(1).withHour(12).withMinute(0));
+            this.comboTransporte.setSelectedIndex(0);
+            this.comboMotivo.setSelectedIndex(0);
+            this.textProcedencia.setText("");
+            this.textAcompanantes.setText("0");
+            this.tabla.setModel(OperacionesCheckin.modeloCheckin());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Checkin c = OperacionesCheckin.buscar(this.idSel);
-            this.comboReserva.setSelectedIndex(0);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(c.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Checkin c = OperacionesCheckin.buscar(this.idSel);
+                this.comboReserva.setSelectedIndex(0);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(c.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
                 }
-            }
-            for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(c.getIdHabitacion() + " - ")) {
-                    this.comboHabitacion.setSelectedIndex(i);
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(c.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
                 }
+                this.fechaIngreso.setValor(c.getFechaIngreso());
+                this.fechaSalida.setValor(c.getFechaSalida());
+                this.textNoches.setText("" + c.getNoches());
+                this.comboTransporte.setSelectedItem(c.getTransporte());
+                this.comboMotivo.setSelectedItem(c.getMotivoViaje());
+                this.textProcedencia.setText(c.getProcedencia());
+                this.textAcompanantes.setText("" + c.getAcompañantes());
             }
-            this.fechaIngreso.setValor(c.getFechaIngreso());
-            this.fechaSalida.setValor(c.getFechaSalida());
-            this.textNoches.setText("" + c.getNoches());
-            this.comboTransporte.setSelectedItem(c.getTransporte());
-            this.comboMotivo.setSelectedItem(c.getMotivoViaje());
-            this.textProcedencia.setText(c.getProcedencia());
-            this.textAcompanantes.setText("" + c.getAcompañantes());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Checkin c = OperacionesCheckin.buscar(this.idSel);
-            this.comboReserva.setSelectedIndex(0);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(c.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Checkin c = OperacionesCheckin.buscar(this.idSel);
+                this.comboReserva.setSelectedIndex(0);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(c.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
                 }
-            }
-            for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(c.getIdHabitacion() + " - ")) {
-                    this.comboHabitacion.setSelectedIndex(i);
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(c.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
                 }
+                this.fechaIngreso.setValor(c.getFechaIngreso());
+                this.fechaSalida.setValor(c.getFechaSalida());
+                this.textNoches.setText("" + c.getNoches());
+                this.comboTransporte.setSelectedItem(c.getTransporte());
+                this.comboMotivo.setSelectedItem(c.getMotivoViaje());
+                this.textProcedencia.setText(c.getProcedencia());
+                this.textAcompanantes.setText("" + c.getAcompañantes());
             }
-            this.fechaIngreso.setValor(c.getFechaIngreso());
-            this.fechaSalida.setValor(c.getFechaSalida());
-            this.textNoches.setText("" + c.getNoches());
-            this.comboTransporte.setSelectedItem(c.getTransporte());
-            this.comboMotivo.setSelectedItem(c.getMotivoViaje());
-            this.textProcedencia.setText(c.getProcedencia());
-            this.textAcompanantes.setText("" + c.getAcompañantes());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

@@ -16,33 +16,37 @@ public class FormReserva extends javax.swing.JFrame {
     private int idSel = 0;
 
     public FormReserva() {
-        Estilo.instalar();
-        initComponents();
-        Estilo.formulario(this);
-        jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
-        jLabel1.setForeground(Estilo.TEXTO);
-        Estilo.boton(btnGuardar, Estilo.ACENTO);
-        Estilo.boton(btnBuscar, Estilo.GRIS);
-        Estilo.boton(btnModificar, Estilo.AZUL);
-        Estilo.boton(btnEliminar, Estilo.ROJO);
-        jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
-        fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
-        fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
-        this.comboCliente.removeAllItems();
-        for (Cliente x : OperacionesCliente.lc) {
-            this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
-        }
-        this.comboHabitacion.removeAllItems();
-        for (Habitacion x : OperacionesHabitacion.lh) {
-            this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
-        }
+        try {
+            Estilo.instalar();
+            initComponents();
+            Estilo.formulario(this);
+            jLabel1.setFont(Estilo.fuente(java.awt.Font.BOLD, 18));
+            jLabel1.setForeground(Estilo.TEXTO);
+            Estilo.boton(btnGuardar, Estilo.ACENTO);
+            Estilo.boton(btnBuscar, Estilo.GRIS);
+            Estilo.boton(btnModificar, Estilo.AZUL);
+            Estilo.boton(btnEliminar, Estilo.ROJO);
+            jScrollPane1.getViewport().setBackground(java.awt.Color.WHITE);
+            jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(Estilo.BORDE));
+            fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+            fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
+            this.comboCliente.removeAllItems();
+            for (Cliente x : OperacionesCliente.listar()) {
+                this.comboCliente.addItem(x.getId() + " - " + x.getNombre() + " " + x.getApellido());
+            }
+            this.comboHabitacion.removeAllItems();
+            for (Habitacion x : OperacionesHabitacion.listar()) {
+                this.comboHabitacion.addItem(x.getId() + " - " + x.getNumero() + " (" + x.getTipoHabitacion() + ")");
+            }
 
-        tabla.setDefaultEditor(Object.class, null);
-        tabla.setModel(OperacionesReserva.modeloReserva());
-        Estilo.tabla(tabla);
-        pack();
-        setLocationRelativeTo(null);
+            tabla.setDefaultEditor(Object.class, null);
+            tabla.setModel(OperacionesReserva.modeloReserva());
+            Estilo.tabla(tabla);
+            pack();
+            setLocationRelativeTo(null);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -89,11 +93,11 @@ public class FormReserva extends javax.swing.JFrame {
 
         jLabel6.setText("Tipo de reserva");
 
-        comboTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Web", "Telefónica", "Presencial" }));
+        comboTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "AIRBNB", "OTRO" }));
 
         jLabel7.setText("Estado");
 
-        comboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Activa", "Cancelada", "Completada" }));
+        comboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "PENDIENTE", "CONFIRMADA", "CANCELADA", "FINALIZADA" }));
 
         btnGuardar.setText("Guardar");
         btnGuardar.addActionListener(new java.awt.event.ActionListener() {
@@ -214,251 +218,275 @@ public class FormReserva extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        int idHab = -1;
-        if (this.comboHabitacion.getItemCount() > 0) {
-            idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
-        }
-        LocalDateTime ent = this.fechaEntrada.getValor();
-        LocalDateTime sal = this.fechaSalida.getValor();
-        String tipo = (String) this.comboTipo.getSelectedItem();
-        String est = (String) this.comboEstado.getSelectedItem();
+        try {
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            int idHab = -1;
+            if (this.comboHabitacion.getItemCount() > 0) {
+                idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
+            }
+            LocalDateTime ent = this.fechaEntrada.getValor();
+            LocalDateTime sal = this.fechaSalida.getValor();
+            String tipo = (String) this.comboTipo.getSelectedItem();
+            String est = (String) this.comboEstado.getSelectedItem();
 
-        if (idCli == -1 || idHab == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (ent.toLocalDate().isBefore(LocalDate.now())) {
-            JOptionPane.showMessageDialog(this, "La entrada no puede ser anterior a hoy", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (!sal.isAfter(ent)) {
-            JOptionPane.showMessageDialog(this, "La salida debe ser después de la entrada", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Habitacion h = OperacionesHabitacion.buscar(idHab);
-        if (h.getEstado().equals("Mantenimiento")) {
-            JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (est.equals("Activa") && !Hotel.habitacionLibre(idHab, ent, sal, 0, 0)) {
-            JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        Reserva r = new Reserva(OperacionesReserva.nuevoId(), idCli, idHab, ent, sal, LocalDateTime.now(), tipo, est);
-        OperacionesReserva.Guardar(r);
-        Hotel.actualizarHabitacion(idHab);
-        JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-        this.idSel = 0;
-        this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
-        this.comboTipo.setSelectedIndex(0);
-        this.comboEstado.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesReserva.modeloReserva());
-        Estilo.ajustarColumnas(this.tabla);
-    }//GEN-LAST:event_btnGuardarActionPerformed
-
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-        String id = JOptionPane.showInputDialog(
-                this,
-                "Ingresar Id de la Reserva",
-                "Datos de la Reserva",
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (id == null || id.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un Id",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-        if (id.length() > 9) {
-            JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        for (int i = 0; i < id.length(); i++) {
-            if (!Character.isDigit(id.charAt(i))) {
-                JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+            if (idCli == -1 || idHab == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        }
-        Reserva r2 = (Reserva) OperacionesReserva.buscar(Integer.parseInt(id.trim()));
+            if (ent.toLocalDate().isBefore(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "La entrada no puede ser anterior a hoy", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!sal.isAfter(ent)) {
+                JOptionPane.showMessageDialog(this, "La salida debe ser después de la entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Habitacion h = OperacionesHabitacion.buscar(idHab);
+            if (h.getEstado().equals("Mantenimiento")) {
+                JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.vigente(est) && !Hotel.habitacionLibre(idHab, ent, sal, 0, 0)) {
+                JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        if (r2 != null) {
-            this.idSel = r2.getIdReserva();
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(r2.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
-                }
-            }
-            for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(r2.getIdHabitacion() + " - ")) {
-                    this.comboHabitacion.setSelectedIndex(i);
-                }
-            }
-            this.fechaEntrada.setValor(r2.getFechaEntrada());
-            this.fechaSalida.setValor(r2.getFechaSalida());
-            this.comboTipo.setSelectedItem(r2.getTipoReserva());
-            this.comboEstado.setSelectedItem(r2.getEstado());
-            for (int i = 0; i < this.tabla.getRowCount(); i++) {
-                if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
-                    this.tabla.setRowSelectionInterval(i, i);
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Reserva no encontrada",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            Reserva r = new Reserva(OperacionesReserva.nuevoId(), idCli, idHab, ent, sal, LocalDateTime.now(), tipo, est);
+            OperacionesReserva.Guardar(r);
+            Hotel.actualizarHabitacion(idHab);
+            JOptionPane.showMessageDialog(this, "Datos guardados correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
             this.idSel = 0;
             this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
             this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
             this.comboTipo.setSelectedIndex(0);
             this.comboEstado.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesReserva.modeloReserva());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        try {
+            String id = JOptionPane.showInputDialog(
+                    this,
+                    "Ingresar Id de la Reserva",
+                    "Datos de la Reserva",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (id == null || id.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debe ingresar un Id",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+            if (id.length() > 9) {
+                JOptionPane.showMessageDialog(this, "El Id puede tener máximo 9 dígitos", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            for (int i = 0; i < id.length(); i++) {
+                if (!Character.isDigit(id.charAt(i))) {
+                    JOptionPane.showMessageDialog(this, "El Id debe ser un número", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+            Reserva r2 = (Reserva) OperacionesReserva.buscar(Integer.parseInt(id.trim()));
+
+            if (r2 != null) {
+                this.idSel = r2.getIdReserva();
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(r2.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
+                }
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(r2.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
+                }
+                this.fechaEntrada.setValor(r2.getFechaEntrada());
+                this.fechaSalida.setValor(r2.getFechaSalida());
+                this.comboTipo.setSelectedItem(r2.getTipoReserva());
+                this.comboEstado.setSelectedItem(r2.getEstado());
+                for (int i = 0; i < this.tabla.getRowCount(); i++) {
+                    if ((int) this.tabla.getValueAt(i, 0) == this.idSel) {
+                        this.tabla.setRowSelectionInterval(i, i);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Reserva no encontrada",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                this.idSel = 0;
+                this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+                this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
+                this.comboTipo.setSelectedIndex(0);
+                this.comboEstado.setSelectedIndex(0);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una reserva de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Reserva actual = OperacionesReserva.buscar(this.idSel);
-        if (actual == null) {
-            JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int idCli = -1;
-        if (this.comboCliente.getItemCount() > 0) {
-            idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
-        }
-        int idHab = -1;
-        if (this.comboHabitacion.getItemCount() > 0) {
-            idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
-        }
-        LocalDateTime ent = this.fechaEntrada.getValor();
-        LocalDateTime sal = this.fechaSalida.getValor();
-        String tipo = (String) this.comboTipo.getSelectedItem();
-        String est = (String) this.comboEstado.getSelectedItem();
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una reserva de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Reserva actual = OperacionesReserva.buscar(this.idSel);
+            if (actual == null) {
+                JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int idCli = -1;
+            if (this.comboCliente.getItemCount() > 0) {
+                idCli = Integer.parseInt(this.comboCliente.getSelectedItem().toString().split(" - ")[0]);
+            }
+            int idHab = -1;
+            if (this.comboHabitacion.getItemCount() > 0) {
+                idHab = Integer.parseInt(this.comboHabitacion.getSelectedItem().toString().split(" - ")[0]);
+            }
+            LocalDateTime ent = this.fechaEntrada.getValor();
+            LocalDateTime sal = this.fechaSalida.getValor();
+            String tipo = (String) this.comboTipo.getSelectedItem();
+            String est = (String) this.comboEstado.getSelectedItem();
 
-        if (idCli == -1 || idHab == -1) {
-            JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (!sal.isAfter(ent)) {
-            JOptionPane.showMessageDialog(this, "La salida debe ser después de la entrada", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Habitacion h = OperacionesHabitacion.buscar(idHab);
-        if (h.getEstado().equals("Mantenimiento")) {
-            JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (est.equals("Activa") && !Hotel.habitacionLibre(idHab, ent, sal, this.idSel, 0)) {
-            JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            if (idCli == -1 || idHab == -1) {
+                JOptionPane.showMessageDialog(this, "Debe haber al menos un cliente y una habitación registrados", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!sal.isAfter(ent)) {
+                JOptionPane.showMessageDialog(this, "La salida debe ser después de la entrada", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Habitacion h = OperacionesHabitacion.buscar(idHab);
+            if (h.getEstado().equals("Mantenimiento")) {
+                JOptionPane.showMessageDialog(this, "La habitación está en mantenimiento", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (Hotel.vigente(est) && !Hotel.habitacionLibre(idHab, ent, sal, this.idSel, 0)) {
+                JOptionPane.showMessageDialog(this, "La habitación ya está reservada u ocupada en esas fechas", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        int habAnterior = actual.getIdHabitacion();
-        if (OperacionesReserva.modificar(this.idSel, idCli, idHab, ent, sal, actual.getCreatedAt(), tipo, est)) {
-            Hotel.actualizarHabitacion(habAnterior);
-            Hotel.actualizarHabitacion(idHab);
-            JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la reserva", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            int habAnterior = actual.getIdHabitacion();
+            if (OperacionesReserva.modificar(this.idSel, idCli, idHab, ent, sal, actual.getCreatedAt(), tipo, est)) {
+                Hotel.actualizarHabitacion(habAnterior);
+                Hotel.actualizarHabitacion(idHab);
+                JOptionPane.showMessageDialog(this, "Se ha modificado correctamente la reserva", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
-        this.comboTipo.setSelectedIndex(0);
-        this.comboEstado.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesReserva.modeloReserva());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+            this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
+            this.comboTipo.setSelectedIndex(0);
+            this.comboEstado.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesReserva.modeloReserva());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        if (this.idSel == 0) {
-            JOptionPane.showMessageDialog(this, "Elige una reserva de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        Reserva actual = OperacionesReserva.buscar(this.idSel);
-        if (actual == null) {
-            JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la reserva " + this.idSel + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
-        if (resp != JOptionPane.YES_OPTION) {
-            return;
-        }
+        try {
+            if (this.idSel == 0) {
+                JOptionPane.showMessageDialog(this, "Elige una reserva de la tabla o usa Buscar", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Reserva actual = OperacionesReserva.buscar(this.idSel);
+            if (actual == null) {
+                JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int resp = JOptionPane.showConfirmDialog(this, "¿Eliminar la reserva " + this.idSel + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (resp != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-        int idHab = actual.getIdHabitacion();
-        if (OperacionesReserva.eliminar(this.idSel)) {
-            Hotel.actualizarHabitacion(idHab);
-            JOptionPane.showMessageDialog(this, "Reserva eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+            int idHab = actual.getIdHabitacion();
+            if (OperacionesReserva.eliminar(this.idSel)) {
+                Hotel.actualizarHabitacion(idHab);
+                JOptionPane.showMessageDialog(this, "Reserva eliminada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Reserva no encontrada", "Error", JOptionPane.ERROR_MESSAGE);
+            }
 
-        this.idSel = 0;
-        this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
-        this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
-        this.comboTipo.setSelectedIndex(0);
-        this.comboEstado.setSelectedIndex(0);
-        this.tabla.setModel(OperacionesReserva.modeloReserva());
-        Estilo.ajustarColumnas(this.tabla);
+            this.idSel = 0;
+            this.fechaEntrada.setValor(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
+            this.fechaSalida.setValor(LocalDateTime.now().plusDays(2).withHour(12).withMinute(0));
+            this.comboTipo.setSelectedIndex(0);
+            this.comboEstado.setSelectedIndex(0);
+            this.tabla.setModel(OperacionesReserva.modeloReserva());
+            Estilo.ajustarColumnas(this.tabla);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tablaMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Reserva r = OperacionesReserva.buscar(this.idSel);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Reserva r = OperacionesReserva.buscar(this.idSel);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
                 }
-            }
-            for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
-                    this.comboHabitacion.setSelectedIndex(i);
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
                 }
+                this.fechaEntrada.setValor(r.getFechaEntrada());
+                this.fechaSalida.setValor(r.getFechaSalida());
+                this.comboTipo.setSelectedItem(r.getTipoReserva());
+                this.comboEstado.setSelectedItem(r.getEstado());
             }
-            this.fechaEntrada.setValor(r.getFechaEntrada());
-            this.fechaSalida.setValor(r.getFechaSalida());
-            this.comboTipo.setSelectedItem(r.getTipoReserva());
-            this.comboEstado.setSelectedItem(r.getEstado());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaMouseReleased
 
     private void tablaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tablaKeyReleased
-        int fila = this.tabla.getSelectedRow();
-        if (fila >= 0) {
-            this.idSel = (int) this.tabla.getValueAt(fila, 0);
-            Reserva r = OperacionesReserva.buscar(this.idSel);
-            for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
-                if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
-                    this.comboCliente.setSelectedIndex(i);
+        try {
+            int fila = this.tabla.getSelectedRow();
+            if (fila >= 0) {
+                this.idSel = (int) this.tabla.getValueAt(fila, 0);
+                Reserva r = OperacionesReserva.buscar(this.idSel);
+                for (int i = 0; i < this.comboCliente.getItemCount(); i++) {
+                    if (this.comboCliente.getItemAt(i).startsWith(r.getIdCliente() + " - ")) {
+                        this.comboCliente.setSelectedIndex(i);
+                    }
                 }
-            }
-            for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
-                if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
-                    this.comboHabitacion.setSelectedIndex(i);
+                for (int i = 0; i < this.comboHabitacion.getItemCount(); i++) {
+                    if (this.comboHabitacion.getItemAt(i).startsWith(r.getIdHabitacion() + " - ")) {
+                        this.comboHabitacion.setSelectedIndex(i);
+                    }
                 }
+                this.fechaEntrada.setValor(r.getFechaEntrada());
+                this.fechaSalida.setValor(r.getFechaSalida());
+                this.comboTipo.setSelectedItem(r.getTipoReserva());
+                this.comboEstado.setSelectedItem(r.getEstado());
             }
-            this.fechaEntrada.setValor(r.getFechaEntrada());
-            this.fechaSalida.setValor(r.getFechaSalida());
-            this.comboTipo.setSelectedItem(r.getTipoReserva());
-            this.comboEstado.setSelectedItem(r.getEstado());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_tablaKeyReleased
 

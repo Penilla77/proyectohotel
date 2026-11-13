@@ -2,6 +2,7 @@ package mundo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import javax.swing.JTable;
 
@@ -13,96 +14,116 @@ public class Reportes {
         "Huéspedes actuales",
         "Ventas de hoy",
         "Todas las ventas",
-        "Resumen por cliente"
+        "Resumen por cliente",
+        "Cuentas abiertas",
+        "Historial de facturas"
     };
 
-    public static JTable tabla(int tipo) {
+    public static JTable tabla(int tipo) throws Exception {
         if (tipo == 0) {
-            Object[][] d = new Object[OperacionesHabitacion.lh.size()][6];
+            LinkedList<Object[]> lh = ConexionBD.filas("SELECT h.numero, h.tipoHabitacion, h.estado, h.precioNoche, h.capacidad, "
+                    + "CASE WHEN h.idCliente IS NULL THEN '-' ELSE COALESCE(CONCAT(c.nombre, ' ', c.apellido), '(eliminado)') END "
+                    + "FROM habitacion h LEFT JOIN cliente c ON c.id = h.idCliente ORDER BY h.id");
+            Object[][] d = new Object[lh.size()][6];
             for (int i = 0; i < d.length; i++) {
-                Habitacion h = (Habitacion) OperacionesHabitacion.lh.get(i);
-                d[i][0] = h.getNumero();
-                d[i][1] = h.getTipoHabitacion();
-                d[i][2] = h.getEstado();
-                d[i][3] = Tablas.dinero(h.getPrecioNoche());
-                d[i][4] = h.getCapacidad();
-                d[i][5] = h.getIdCliente() == 0 ? "-" : OperacionesCliente.nombreCompleto(h.getIdCliente());
+                Object[] h = lh.get(i);
+                d[i][0] = h[0];
+                d[i][1] = h[1];
+                d[i][2] = h[2];
+                d[i][3] = Tablas.dinero((BigDecimal) h[3]);
+                d[i][4] = h[4];
+                d[i][5] = h[5];
             }
             return Tablas.tabla(Tablas.modelo(new String[]{"Número", "Tipo", "Estado", "Precio por noche", "Capacidad", "Cliente"}, d));
         }
         if (tipo == 1) {
-            LinkedList<Reserva> lista = new LinkedList();
-            for (int i = 0; i < OperacionesReserva.lr.size(); i++) {
-                Reserva r = (Reserva) OperacionesReserva.lr.get(i);
-                if (r.getEstado().equals("Activa")) {
-                    lista.add(r);
-                }
-            }
+            LinkedList<Object[]> lista = ConexionBD.filas("SELECT r.idReserva, COALESCE(CONCAT(c.nombre, ' ', c.apellido), '(eliminado)'), "
+                    + "COALESCE(h.numero, '(eliminada)'), r.fechaEntrada, r.fechaSalida "
+                    + "FROM reserva r LEFT JOIN cliente c ON c.id = r.idCliente LEFT JOIN habitacion h ON h.id = r.idHabitacion "
+                    + "WHERE r.estado IN ('PENDIENTE', 'CONFIRMADA') ORDER BY r.idReserva");
             Object[][] d = new Object[lista.size()][6];
             for (int i = 0; i < d.length; i++) {
-                Reserva r = lista.get(i);
-                d[i][0] = r.getIdReserva();
-                d[i][1] = OperacionesCliente.nombreCompleto(r.getIdCliente());
-                d[i][2] = OperacionesHabitacion.numero(r.getIdHabitacion());
-                d[i][3] = Tablas.fecha(r.getFechaEntrada());
-                d[i][4] = Tablas.fecha(r.getFechaSalida());
-                d[i][5] = Hotel.noches(r.getFechaEntrada(), r.getFechaSalida());
+                Object[] r = lista.get(i);
+                LocalDateTime entrada = (LocalDateTime) r[3];
+                LocalDateTime salida = (LocalDateTime) r[4];
+                d[i][0] = r[0];
+                d[i][1] = r[1];
+                d[i][2] = r[2];
+                d[i][3] = Tablas.fecha(entrada);
+                d[i][4] = Tablas.fecha(salida);
+                d[i][5] = Hotel.noches(entrada, salida);
             }
             return Tablas.tabla(Tablas.modelo(new String[]{"Id", "Cliente", "Habitación", "Entrada", "Salida", "Noches"}, d));
         }
         if (tipo == 2) {
-            Object[][] d = new Object[OperacionesCheckin.lck.size()][7];
+            LinkedList<Object[]> lck = ConexionBD.filas("SELECT k.idCheckin, COALESCE(CONCAT(c.nombre, ' ', c.apellido), '(eliminado)'), "
+                    + "COALESCE(h.numero, '(eliminada)'), k.fechaIngreso, k.fechaSalida, k.noches, k.acompañantes "
+                    + "FROM checkin k LEFT JOIN cliente c ON c.id = k.idCliente LEFT JOIN habitacion h ON h.id = k.idHabitacion "
+                    + "ORDER BY k.idCheckin");
+            Object[][] d = new Object[lck.size()][7];
             for (int i = 0; i < d.length; i++) {
-                Checkin c = (Checkin) OperacionesCheckin.lck.get(i);
-                d[i][0] = c.getIdCheckin();
-                d[i][1] = OperacionesCliente.nombreCompleto(c.getIdCliente());
-                d[i][2] = OperacionesHabitacion.numero(c.getIdHabitacion());
-                d[i][3] = Tablas.fecha(c.getFechaIngreso());
-                d[i][4] = Tablas.fecha(c.getFechaSalida());
-                d[i][5] = c.getNoches();
-                d[i][6] = c.getAcompañantes();
+                Object[] c = lck.get(i);
+                d[i][0] = c[0];
+                d[i][1] = c[1];
+                d[i][2] = c[2];
+                d[i][3] = Tablas.fecha((LocalDateTime) c[3]);
+                d[i][4] = Tablas.fecha((LocalDateTime) c[4]);
+                d[i][5] = c[5];
+                d[i][6] = c[6];
             }
             return Tablas.tabla(Tablas.modelo(new String[]{"Id", "Cliente", "Habitación", "Ingreso", "Salida", "Noches", "Acompañantes"}, d));
         }
         if (tipo == 3 || tipo == 4) {
-            LinkedList<Venta> lista = new LinkedList();
-            for (int i = 0; i < OperacionesVenta.lv.size(); i++) {
-                Venta v = (Venta) OperacionesVenta.lv.get(i);
-                if (tipo == 4 || v.getFecha().toLocalDate().equals(LocalDate.now())) {
+            LinkedList<Object[]> lv = ConexionBD.filas("SELECT v.idVenta, v.fecha, COALESCE(CONCAT(c.nombre, ' ', c.apellido), '(eliminado)'), v.tipoPago, v.total "
+                    + "FROM venta v LEFT JOIN cliente c ON c.id = v.idCliente ORDER BY v.idVenta");
+            LinkedList<Object[]> lista = new LinkedList();
+            for (int i = 0; i < lv.size(); i++) {
+                Object[] v = lv.get(i);
+                if (tipo == 4 || ((LocalDateTime) v[1]).toLocalDate().equals(LocalDate.now())) {
                     lista.add(v);
                 }
             }
             Object[][] d = new Object[lista.size()][5];
             for (int i = 0; i < d.length; i++) {
-                Venta v = lista.get(i);
-                d[i][0] = v.getIdVenta();
-                d[i][1] = Tablas.fecha(v.getFecha());
-                d[i][2] = OperacionesCliente.nombreCompleto(v.getIdCliente());
-                d[i][3] = v.getTipoPago();
-                d[i][4] = Tablas.dinero(v.getTotal());
+                Object[] v = lista.get(i);
+                d[i][0] = v[0];
+                d[i][1] = Tablas.fecha((LocalDateTime) v[1]);
+                d[i][2] = v[2];
+                d[i][3] = v[3];
+                d[i][4] = Tablas.dinero((BigDecimal) v[4]);
             }
             return Tablas.tabla(Tablas.modelo(new String[]{"Id", "Fecha", "Cliente", "Tipo de pago", "Total"}, d));
         }
-        Object[][] d = new Object[OperacionesCliente.lc.size()][5];
+        if (tipo == 6) {
+            return Tablas.tabla(OperacionesCuenta.modeloCuenta());
+        }
+        if (tipo == 7) {
+            return Tablas.tabla(OperacionesFactura.modeloFactura());
+        }
+        LinkedList<Cliente> lc = OperacionesCliente.listar();
+        LinkedList<Reserva> lr = OperacionesReserva.listar();
+        LinkedList<Checkin> lck = OperacionesCheckin.listar();
+        LinkedList<Venta> lv = OperacionesVenta.listar();
+        Object[][] d = new Object[lc.size()][5];
         for (int i = 0; i < d.length; i++) {
-            Cliente c = (Cliente) OperacionesCliente.lc.get(i);
+            Cliente c = (Cliente) lc.get(i);
             int reservas = 0;
             int checkins = 0;
             BigDecimal gastado = BigDecimal.ZERO;
-            for (int j = 0; j < OperacionesReserva.lr.size(); j++) {
-                Reserva r = (Reserva) OperacionesReserva.lr.get(j);
-                if (r.getIdCliente() == c.getId() && r.getEstado().equals("Activa")) {
+            for (int j = 0; j < lr.size(); j++) {
+                Reserva r = (Reserva) lr.get(j);
+                if (r.getIdCliente() == c.getId() && Hotel.vigente(r.getEstado())) {
                     reservas++;
                 }
             }
-            for (int j = 0; j < OperacionesCheckin.lck.size(); j++) {
-                Checkin k = (Checkin) OperacionesCheckin.lck.get(j);
+            for (int j = 0; j < lck.size(); j++) {
+                Checkin k = (Checkin) lck.get(j);
                 if (k.getIdCliente() == c.getId()) {
                     checkins++;
                 }
             }
-            for (int j = 0; j < OperacionesVenta.lv.size(); j++) {
-                Venta v = (Venta) OperacionesVenta.lv.get(j);
+            for (int j = 0; j < lv.size(); j++) {
+                Venta v = (Venta) lv.get(j);
                 if (v.getIdCliente() == c.getId()) {
                     gastado = gastado.add(v.getTotal());
                 }
@@ -116,11 +137,12 @@ public class Reportes {
         return Tablas.tabla(Tablas.modelo(new String[]{"Cliente", "Reservas activas", "Check-in", "Total comprado", "Correo"}, d));
     }
 
-    public static String resumen(int tipo) {
+    public static String resumen(int tipo) throws Exception {
         if (tipo == 0) {
+            LinkedList<Habitacion> lh = OperacionesHabitacion.listar();
             int dis = 0, res = 0, ocu = 0, man = 0;
-            for (int i = 0; i < OperacionesHabitacion.lh.size(); i++) {
-                String e = ((Habitacion) OperacionesHabitacion.lh.get(i)).getEstado();
+            for (int i = 0; i < lh.size(); i++) {
+                String e = ((Habitacion) lh.get(i)).getEstado();
                 if (e.equals("Disponible")) {
                     dis++;
                 } else if (e.equals("Reservada")) {
@@ -131,26 +153,28 @@ public class Reportes {
                     man++;
                 }
             }
-            return "Total: " + OperacionesHabitacion.lh.size() + "   |   Disponibles: " + dis + "   |   Reservadas: " + res
+            return "Total: " + lh.size() + "   |   Disponibles: " + dis + "   |   Reservadas: " + res
                     + "   |   Ocupadas: " + ocu + "   |   En mantenimiento: " + man;
         }
         if (tipo == 1) {
             return "Reservas activas: " + tabla(1).getRowCount();
         }
         if (tipo == 2) {
+            LinkedList<Checkin> lck = OperacionesCheckin.listar();
             int personas = 0;
-            for (int i = 0; i < OperacionesCheckin.lck.size(); i++) {
-                Checkin c = (Checkin) OperacionesCheckin.lck.get(i);
+            for (int i = 0; i < lck.size(); i++) {
+                Checkin c = (Checkin) lck.get(i);
                 personas += 1 + c.getAcompañantes();
             }
-            return "Check-in activos: " + OperacionesCheckin.lck.size() + "   |   Personas alojadas: " + personas;
+            return "Check-in activos: " + lck.size() + "   |   Personas alojadas: " + personas;
         }
         if (tipo == 3 || tipo == 4) {
+            LinkedList<Venta> lv = OperacionesVenta.listar();
             int n = 0;
             BigDecimal total = BigDecimal.ZERO;
             BigDecimal iva = BigDecimal.ZERO;
-            for (int i = 0; i < OperacionesVenta.lv.size(); i++) {
-                Venta v = (Venta) OperacionesVenta.lv.get(i);
+            for (int i = 0; i < lv.size(); i++) {
+                Venta v = (Venta) lv.get(i);
                 if (tipo == 4 || v.getFecha().toLocalDate().equals(LocalDate.now())) {
                     n++;
                     total = total.add(v.getTotal());
@@ -159,6 +183,19 @@ public class Reportes {
             }
             return "Ventas: " + n + "   |   Total vendido: " + Tablas.dinero(total) + "   |   IVA: " + Tablas.dinero(iva);
         }
-        return "Clientes: " + OperacionesCliente.lc.size();
+        if (tipo == 6) {
+            return "Cuentas abiertas: " + tabla(6).getRowCount();
+        }
+        if (tipo == 7) {
+            LinkedList<Factura> lf = OperacionesFactura.listar();
+            BigDecimal total = BigDecimal.ZERO;
+            for (int i = 0; i < lf.size(); i++) {
+                Factura f = (Factura) lf.get(i);
+                total = total.add(f.getTotal());
+            }
+            return "Facturas: " + lf.size() + "   |   Total facturado: " + Tablas.dinero(total);
+        }
+        return "Clientes: " + OperacionesCliente.listar().size();
     }
+
 }
