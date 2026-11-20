@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clientes · Hotel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+</head>
+<body>
+  <a class="saltar visually-hidden-focusable" href="#contenido">Saltar al contenido</a>
+
+  <header class="navbar sticky-top md:flex-nowrap p-0 shadow" data-bs-theme="dark">
+    <a class="navbar-brand md:col-3 lg:col-2 me-0 px-3 fs-md fg-white" href="index.html"><i class="bi bi-building me-2" aria-hidden="true"></i>Hotel</a>
+    <ul class="navbar-nav flex-row md:d-none">
+      <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 fg-white" type="button" data-bs-toggle="drawer" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Abrir menú">
+          <i class="bi bi-list fs-4" aria-hidden="true"></i>
+        </button>
+      </li>
+    </ul>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="sidebar border border-end md:col-3 lg:col-2 p-0 bg-1">
+        <dialog class="md:drawer drawer-end bg-1" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+          <div class="drawer-header">
+            <h5 class="drawer-title" id="sidebarMenuLabel">Hotel</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="drawer" data-bs-target="#sidebarMenu" aria-label="Cerrar"></button>
+          </div>
+          <nav class="drawer-body md:d-flex flex-column p-0 lg:pt-3 overflow-y-auto" aria-label="Menú principal"><h6 class="sidebar-heading px-3 mt-2 mb-1 fg-2 text-uppercase"><span>Inicio</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="index.html"><i class="bi bi-house" aria-hidden="true"></i>Panel</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Recepción</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="clientes.html"><i class="bi bi-people" aria-hidden="true"></i>Clientes</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="habitaciones.html"><i class="bi bi-door-closed" aria-hidden="true"></i>Habitaciones</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="reservas.html"><i class="bi bi-calendar-event" aria-hidden="true"></i>Reservas</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="checkin.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Check-in</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="cuentas.html"><i class="bi bi-cash-stack" aria-hidden="true"></i>Cuentas y checkout</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Productos</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="categorias.html"><i class="bi bi-tags" aria-hidden="true"></i>Categorías</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="productos.html"><i class="bi bi-box-seam" aria-hidden="true"></i>Productos</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Ventas</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="ventas.html"><i class="bi bi-cart" aria-hidden="true"></i>Ventas</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="facturas.html"><i class="bi bi-receipt" aria-hidden="true"></i>Historial de facturas</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Análisis</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="reportes.html"><i class="bi bi-bar-chart" aria-hidden="true"></i>Reportes</a></li></ul></nav>
+        </dialog>
+      </div>
+
+      <main class="md:col-9 sm:ms-auto lg:col-10 md:px-4" id="contenido" tabindex="-1">
+        <div class="d-flex justify-content-between flex-wrap md:flex-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div>
+            <div class="fg-2 small text-uppercase">Recepción</div>
+            <h1 class="h2 mb-0">Clientes</h1>
+            <p class="fg-2 mb-0">Registra, busca y modifica a los huéspedes</p>
+          </div>
+          <div class="btn-toolbar mb-2 md:mb-0 gap-2"><button type="button" class="btn-solid theme-primary" data-nuevo><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Nuevo cliente</button></div>
+        </div>
+<div class="card mb-4"><h5 class="card-header">Clientes registrados</h5><div class="card-body"><p class="card-subtitle fg-3">Elige una fila para ver y editar sus datos.</p><input type="search" class="form-control w-auto" placeholder="Buscar…" data-filtro="#tabla" aria-label="Buscar en la tabla"></div><div class="table-responsive tabla-scroll"><table class="table align-middle text-nowrap table-hover table-seleccionable " id="tabla" data-form="#formCliente"><thead><tr><th scope="col">Id</th><th scope="col">Nombre</th><th scope="col">Apellido</th><th scope="col">Documento</th><th scope="col">Correo</th><th scope="col">Teléfono</th><th scope="col">Dirección</th><th scope="col">Sexo</th></tr></thead><tbody><tr data-fill="{&quot;nombre&quot;: &quot;Laura&quot;, &quot;apellido&quot;: &quot;Martínez&quot;, &quot;documento&quot;: &quot;52345678&quot;, &quot;correo&quot;: &quot;laura.martinez@correo.com&quot;, &quot;telefono&quot;: &quot;3001234567&quot;, &quot;direccion&quot;: &quot;Calle 10 #5-20, Cúcuta&quot;, &quot;sexo&quot;: &quot;Femenino&quot;}" tabindex="0"><td>1</td><td>Laura</td><td>Martínez</td><td>52345678</td><td>laura.martinez@correo.com</td><td>3001234567</td><td>Calle 10 #5-20, Cúcuta</td><td>Femenino</td></tr><tr data-fill="{&quot;nombre&quot;: &quot;Carlos&quot;, &quot;apellido&quot;: &quot;Rojas&quot;, &quot;documento&quot;: &quot;88123456&quot;, &quot;correo&quot;: &quot;carlos.rojas@correo.com&quot;, &quot;telefono&quot;: &quot;3109876543&quot;, &quot;direccion&quot;: &quot;Av. 4 #12-30, Cúcuta&quot;, &quot;sexo&quot;: &quot;Masculino&quot;}" tabindex="0"><td>2</td><td>Carlos</td><td>Rojas</td><td>88123456</td><td>carlos.rojas@correo.com</td><td>3109876543</td><td>Av. 4 #12-30, Cúcuta</td><td>Masculino</td></tr><tr data-fill="{&quot;nombre&quot;: &quot;Andrea&quot;, &quot;apellido&quot;: &quot;Gómez&quot;, &quot;documento&quot;: &quot;60234891&quot;, &quot;correo&quot;: &quot;andrea.gomez@correo.com&quot;, &quot;telefono&quot;: &quot;3157654321&quot;, &quot;direccion&quot;: &quot;Carrera 7 #8-15, Pamplona&quot;, &quot;sexo&quot;: &quot;Femenino&quot;}" tabindex="0"><td>3</td><td>Andrea</td><td>Gómez</td><td>60234891</td><td>andrea.gomez@correo.com</td><td>3157654321</td><td>Carrera 7 #8-15, Pamplona</td><td>Femenino</td></tr><tr data-fill="{&quot;nombre&quot;: &quot;Julián&quot;, &quot;apellido&quot;: &quot;Pabón&quot;, &quot;documento&quot;: &quot;13456789&quot;, &quot;correo&quot;: &quot;julian.pabon@correo.com&quot;, &quot;telefono&quot;: &quot;3201112233&quot;, &quot;direccion&quot;: &quot;Calle 3 #2-10, Ocaña&quot;, &quot;sexo&quot;: &quot;Masculino&quot;}" tabindex="0"><td>4</td><td>Julián</td><td>Pabón</td><td>13456789</td><td>julian.pabon@correo.com</td><td>3201112233</td><td>Calle 3 #2-10, Ocaña</td><td>Masculino</td></tr><tr data-fill="{&quot;nombre&quot;: &quot;Sofía&quot;, &quot;apellido&quot;: &quot;Contreras&quot;, &quot;documento&quot;: &quot;37890123&quot;, &quot;correo&quot;: &quot;sofia.contreras@correo.com&quot;, &quot;telefono&quot;: &quot;3014445566&quot;, &quot;direccion&quot;: &quot;Av. 0 #20-45, Cúcuta&quot;, &quot;sexo&quot;: &quot;Femenino&quot;}" tabindex="0"><td>5</td><td>Sofía</td><td>Contreras</td><td>37890123</td><td>sofia.contreras@correo.com</td><td>3014445566</td><td>Av. 0 #20-45, Cúcuta</td><td>Femenino</td></tr></tbody></table></div></div>
+      </main>
+    </div>
+  </div>
+<dialog class="drawer drawer-end panel-form" tabindex="-1" id="panelForm" aria-labelledby="tituloPanelForm" data-form="#formCliente" data-titulo-nuevo="Nuevo cliente" data-titulo-editar="Editar cliente"><div class="drawer-header"><h5 class="drawer-title" id="tituloPanelForm">Nuevo cliente</h5><button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Cerrar"></button></div><div class="drawer-body"><form class="grid gap-4" id="formCliente" data-bs-validate novalidate><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="nombre">Nombre *</label><input type="text" class="form-control" id="nombre" name="nombre" required maxlength="40" autocomplete="off"><div class="invalid-feedback">Este campo es obligatorio.</div></div><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="apellido">Apellido *</label><input type="text" class="form-control" id="apellido" name="apellido" required maxlength="40" autocomplete="off"><div class="invalid-feedback">Este campo es obligatorio.</div></div><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="documento">Documento *</label><input type="text" class="form-control" id="documento" name="documento" required inputmode="numeric" pattern="[0-9]{5,10}" maxlength="10"><div class="invalid-feedback">Solo números, entre 5 y 10 dígitos.</div></div><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="correo">Correo *</label><input type="email" class="form-control" id="correo" name="correo" required ><div class="invalid-feedback">Escribe un correo válido.</div></div><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="telefono">Teléfono *</label><input type="tel" class="form-control" id="telefono" name="telefono" required pattern="[0-9]{7,10}" maxlength="10"><div class="invalid-feedback">Solo números, entre 7 y 10 dígitos.</div></div><div class="form-field g-col-12 md:g-col-6"><label class="form-label" for="sexo">Sexo *</label><select class="form-control" id="sexo" name="sexo" required><option value="">Elige…</option><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select><div class="invalid-feedback">Elige una opción.</div></div><div class="form-field g-col-12 md:g-col-12"><label class="form-label" for="direccion">Dirección *</label><input type="text" class="form-control" id="direccion" name="direccion" required maxlength="80"><div class="invalid-feedback">Este campo es obligatorio.</div></div><div class="g-col-12 d-flex flex-wrap gap-2 justify-content-between pt-2"><button type="button" class="btn-outline theme-danger" data-eliminar data-solo-edicion hidden><i class="bi bi-trash me-1" aria-hidden="true"></i>Eliminar</button><span class="d-flex gap-2 ms-auto"><button type="button" class="btn-outline theme-secondary" data-bs-dismiss="drawer">Cancelar</button><button type="submit" class="btn-solid theme-primary" data-accion="guardar" data-solo-nuevo>Guardar</button><button type="submit" class="btn-solid theme-primary" data-accion="modificar" data-solo-edicion hidden>Guardar cambios</button></span></div></form></div></dialog>
+<dialog class="dialog" id="modalEliminar" aria-labelledby="tituloEliminar">
+  <div class="dialog-header"><h1 class="dialog-title" id="tituloEliminar">Eliminar registro</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="dialog" aria-label="Cerrar"></button></div>
+  <div class="dialog-body"><p>¿Seguro que quieres eliminar el registro seleccionado? Esta acción no se puede deshacer.</p></div>
+  <div class="dialog-footer">
+    <button type="button" class="btn-outline theme-secondary" data-bs-dismiss="dialog">Cancelar</button>
+    <button type="button" class="btn-solid theme-danger" id="confirmarEliminar">Eliminar</button></div>
+</dialog>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="avisos" aria-live="polite"></div>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

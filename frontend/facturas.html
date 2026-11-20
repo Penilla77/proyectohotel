@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Historial de facturas · Hotel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="assets/css/estilo.css" rel="stylesheet">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL" crossorigin="anonymous"></script>
+</head>
+<body>
+  <a class="saltar visually-hidden-focusable" href="#contenido">Saltar al contenido</a>
+
+  <header class="navbar sticky-top md:flex-nowrap p-0 shadow" data-bs-theme="dark">
+    <a class="navbar-brand md:col-3 lg:col-2 me-0 px-3 fs-md fg-white" href="index.html"><i class="bi bi-building me-2" aria-hidden="true"></i>Hotel</a>
+    <ul class="navbar-nav flex-row md:d-none">
+      <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 fg-white" type="button" data-bs-toggle="drawer" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Abrir menú">
+          <i class="bi bi-list fs-4" aria-hidden="true"></i>
+        </button>
+      </li>
+    </ul>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="sidebar border border-end md:col-3 lg:col-2 p-0 bg-1">
+        <dialog class="md:drawer drawer-end bg-1" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+          <div class="drawer-header">
+            <h5 class="drawer-title" id="sidebarMenuLabel">Hotel</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="drawer" data-bs-target="#sidebarMenu" aria-label="Cerrar"></button>
+          </div>
+          <nav class="drawer-body md:d-flex flex-column p-0 lg:pt-3 overflow-y-auto" aria-label="Menú principal"><h6 class="sidebar-heading px-3 mt-2 mb-1 fg-2 text-uppercase"><span>Inicio</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="index.html"><i class="bi bi-house" aria-hidden="true"></i>Panel</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Recepción</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="clientes.html"><i class="bi bi-people" aria-hidden="true"></i>Clientes</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="habitaciones.html"><i class="bi bi-door-closed" aria-hidden="true"></i>Habitaciones</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="reservas.html"><i class="bi bi-calendar-event" aria-hidden="true"></i>Reservas</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="checkin.html"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>Check-in</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="cuentas.html"><i class="bi bi-cash-stack" aria-hidden="true"></i>Cuentas y checkout</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Productos</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="categorias.html"><i class="bi bi-tags" aria-hidden="true"></i>Categorías</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="productos.html"><i class="bi bi-box-seam" aria-hidden="true"></i>Productos</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Ventas</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="ventas.html"><i class="bi bi-cart" aria-hidden="true"></i>Ventas</a></li><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="facturas.html"><i class="bi bi-receipt" aria-hidden="true"></i>Historial de facturas</a></li></ul><h6 class="sidebar-heading px-3 mt-4 mb-1 fg-2 text-uppercase"><span>Análisis</span></h6><ul class="nav flex-column"><li class="nav-item"><a class="nav-link d-flex align-items-center gap-2" href="reportes.html"><i class="bi bi-bar-chart" aria-hidden="true"></i>Reportes</a></li></ul></nav>
+        </dialog>
+      </div>
+
+      <main class="md:col-9 sm:ms-auto lg:col-10 md:px-4" id="contenido" tabindex="-1">
+        <div class="d-flex justify-content-between flex-wrap md:flex-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <div>
+            <div class="fg-2 small text-uppercase">Ventas</div>
+            <h1 class="h2 mb-0">Historial de facturas</h1>
+            <p class="fg-2 mb-0">Consulta cualquier factura generada, en cualquier momento</p>
+          </div>
+          <div class="btn-toolbar mb-2 md:mb-0 gap-2"></div>
+        </div>
+<div class="card mb-4"><h5 class="card-header">Facturas emitidas</h5><div class="card-body"><p class="card-subtitle fg-3">Cada factura se guarda tal como se emitió: no cambia aunque después cambien los precios o se borre la venta.</p><input type="search" class="form-control w-auto" placeholder="Buscar…" data-filtro="#tablaFacturas" aria-label="Buscar en la tabla"></div><div class="table-responsive tabla-scroll"><table class="table table-hover table-seleccionable align-middle text-nowrap " id="tablaFacturas"><thead><tr><th scope="col">Factura</th><th scope="col">Fecha</th><th scope="col">Cliente</th><th scope="col">Venta</th><th scope="col" class="num">Total</th></tr></thead><tbody><tr data-detalle="FACTURA No. 2
+Fecha:   12/11/2026 11:00
+Cliente: Laura Martínez
+Pago:    Transferencia
+
+Detalle                   Cant.       Precio       Subtotal
+Cerveza nacional              6      $ 5.000       $ 30.000
+Chocolatina                   2      $ 2.200        $ 4.400
+
+Exento                                                  $ 0
+IVA 5%                                              $ 1.500
+IVA 19%                                               $ 836
+TOTAL                                              $ 36.736
+" tabindex="0"><td>2</td><td>12/11/2026 11:00</td><td>Laura Martínez</td><td>3</td><td class="num">$ 36.736</td></tr><tr data-detalle="FACTURA No. 1
+Fecha:   12/11/2026 09:00
+Cliente: Laura Martínez
+Pago:    Efectivo
+
+Detalle                   Cant.       Precio       Subtotal
+Agua 600 ml                   2      $ 2.500        $ 5.000
+Gaseosa 400 ml                1      $ 3.500        $ 3.500
+
+Exento                                              $ 5.000
+IVA 5%                                                  $ 0
+IVA 19%                                               $ 665
+TOTAL                                               $ 9.165
+" tabindex="0"><td>1</td><td>12/11/2026 09:00</td><td>Laura Martínez</td><td>1</td><td class="num">$ 9.165</td></tr></tbody></table></div></div>
+      <div class="card mb-4"><h5 class="card-header">Factura seleccionada</h5><div class="card-body">
+        <pre class="factura" id="detalleFactura">Elige una factura de la lista para verla aquí.</pre></div></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="avisos" aria-live="polite"></div>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
